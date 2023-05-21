@@ -1,0 +1,29 @@
+server:
+  port: 8848
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/meetu?serviceTimezone=GMT+8&useSSL=false&characterEncoding=UTF-8
+    username: root
+    password: 123abc
+  application:
+    name: MeetU
+  main:
+    banner-mode: off
+    lazy-initialization: true
+  jmx:
+    enabled: false
+  # swagger 配置 3.0 防止报错
+  mvc:
+    path match:
+      matching-strategy: ant_path_matcher
+    servlet:
+      load-on-startup: 1 # 启动时初始化 DispatcherServlet
+# mybatis-plus 区
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    cache-enabled: true
+  global-config:
+    banner: off
