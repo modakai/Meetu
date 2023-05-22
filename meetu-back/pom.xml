@@ -14,6 +14,7 @@
         <module>meetu-entity</module>
         <module>meetu-mapper</module>
         <module>meetu-service</module>
+        <module>meetu-generate</module>
     </modules>
 
     <packaging>pom</packaging>

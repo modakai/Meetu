@@ -1,0 +1,28 @@
+package com.sakura.meetu.exception;
+
+/**
+ * @author sakura
+ * @create 2023/5/21 20:35
+ */
+public class ServiceException extends RuntimeException{
+    private static final Long serialVersionUID = 1L;
+
+    private String code;
+
+    public String getCode() {
+        return code;
+    }
+
+    public ServiceException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ServiceException(String message) {
+        super(message);
+    }
+
+    public ServiceException(String code, String message) {
+        super(message);
+        this.code = code;
+    }
+}
