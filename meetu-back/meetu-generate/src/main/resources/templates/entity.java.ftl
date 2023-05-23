@@ -61,7 +61,7 @@ import lombok.experimental.Accessors;
                 ${field.comment}
             */
             @ApiModelProperty("${field.comment}")
-<#--            @Alias("${field.comment}")-->
+            @Alias("${field.comment}")
         </#if>
     </#if>
     <#if field.keyFlag>

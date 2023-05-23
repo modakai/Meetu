@@ -37,6 +37,7 @@
         <freemarker.version>2.3.31</freemarker.version>
         <jjwt.version>0.9.1</jjwt.version>
         <hutool.version>5.8.9</hutool.version>
+        <poi.ooxml.version>5.2.3</poi.ooxml.version>
     </properties>
 
 <!--    管理依赖-->
@@ -85,6 +86,11 @@
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.ooxml.version}</version>
             </dependency>
 
         </dependencies>

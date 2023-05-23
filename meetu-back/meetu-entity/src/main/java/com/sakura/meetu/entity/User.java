@@ -1,5 +1,6 @@
 package com.sakura.meetu.entity;
 
+import cn.hutool.core.annotation.Alias;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -8,7 +9,6 @@ import java.io.Serializable;
 import java.util.Objects;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.ibatis.type.Alias;
 
 /**
  * <p>
@@ -25,18 +25,21 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
+    @Alias("id")
     private Integer id;
 
     /**
      * 用户名
      */
     @ApiModelProperty("用户名")
+    @Alias("用户名")
     private String username;
 
     /**
      * 密码
      */
     @ApiModelProperty("密码")
+    @Alias("密码")
     private String password;
 
 
