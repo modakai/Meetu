@@ -8,16 +8,19 @@ import java.io.Serializable;
 
 /**
  * 接口统一返回包装类
+ *
  * @author sakura
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Result implements Serializable {
-    private  static final long serialVersionUID = 42L;
-    private static final String CODE_SUCCESS = "200";
-    private static final String CODE_SYS_ERROR = "500";
-
+    public static final String CODE_SUCCESS = "200";
+    public static final String CODE_SYS_ERROR = "500";
+    public static final String CODE_ERROR_400 = "400";
+    public static final String CODE_ERROR_404 = "404";
+    public static final String CODE_ERROR_403 = "403";
+    private static final long serialVersionUID = 42L;
     private String code;
     private String msg;
     private Object data;

@@ -55,34 +55,35 @@ public class ${entity} {
         <#assign keyPropertyName="${field.propertyName}"/>
     </#if>
 
-    <#if field.comment!?length gt 0>
-        <#if swagger>
-            // ${field.comment}
-            @ApiModelProperty("${field.comment}")
-            @Alias("${field.comment}")
-        </#if>
+<#if field.comment!?length gt 0>
+    <#if swagger>
+    // ${field.comment}
+    @ApiModelProperty("${field.comment}")
+    @Alias("${field.comment}")
     </#if>
+</#if>
     <#if field.keyFlag>
     <#-- 主键 -->
-        <#if field.keyIdentityFlag>
-            @TableId(value = "${field.annotationColumnName}", type = IdType.AUTO)
-        <#elseif idType??>
-            @TableId(value = "${field.annotationColumnName}", type = IdType.${idType})
-        <#elseif field.convert>
-            @TableId("${field.annotationColumnName}")
-        </#if>
+    <#if field.keyIdentityFlag>
+    @TableId(value = "${field.annotationColumnName}", type = IdType.AUTO)
+    <#elseif idType??>
+    @TableId(value = "${field.annotationColumnName}", type = IdType.${idType})
+    <#elseif field.convert>
+    @TableId("${field.annotationColumnName}")
+    </#if>
     <#-- 普通字段 -->
     <#elseif field.fill??>
     <#-- -----   存在字段填充设置   ----->
-        <#if field.convert>
-            @TableField(value = "${field.annotationColumnName}", fill = FieldFill.${field.fill})
-        <#else>
-            @TableField(fill = FieldFill.${field.fill})
-            @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
-            @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
-        </#if>
+    <#if field.convert>
+    @TableField(value = "${field.annotationColumnName}", fill = FieldFill.${field.fill})
+    <#else>
+    @TableField(fill = FieldFill.${field.fill})
+<#--    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)-->
+<#--    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)-->
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss" timezone = "Asia/Shanghai")
+    </#if>
     <#elseif field.convert>
-        @TableField("${field.annotationColumnName}")
+    @TableField("${field.annotationColumnName}")
     </#if>
 <#-- 乐观锁注解 -->
     <#if field.versionField>
@@ -90,7 +91,7 @@ public class ${entity} {
     </#if>
 <#-- 逻辑删除注解 -->
     <#if field.logicDeleteField>
-        @TableLogic(value = "0", delval = "id")
+    @TableLogic(value = "0", delval = "id")
     </#if>
     private ${field.propertyType} ${field.propertyName};
 </#list>

@@ -7,7 +7,9 @@ export const useUserStore = defineStore('user', {
     }),
     // 用于操作 state中的数据
     actions: {
-
+        setUserInfo(data) {
+            this.userInfo = data
+        }
     },
     // 开启数据持久化
     // persist: {

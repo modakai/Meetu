@@ -12,13 +12,30 @@
         },
         rules: {
           username: [
-            { required: true, message: '请输入用户名', trigger: 'blur' },
-            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+            { required: true, message: '请输入账号或邮箱', trigger: 'blur' },
+            // { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
           ],
           password: [
             { required: true, message: '请输入密码', trigger: 'blur' },
           ],
         },
+        pwdVis: false,
+        pwdForm: {
+          email: '',
+          code: ''
+        },
+        rulePwds: {
+          email: [
+            { required: true, message: '邮箱不能为空', trigger: 'blur' },
+            { required: true, type: 'email', message: '邮箱格式不正确', trigger: 'blur'}
+          ],
+          code: [
+            { required: true, message: '验证码不能为空', trigger: 'blur' },
+          ],
+        },
+        time: 0,
+        interval: -1,
+        emailReg: /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/,
       }
     },
     methods: {
@@ -46,6 +63,63 @@
             this.$message.error('不符合规范哦! 请注意规范');
           }
         })
+      },
+      // 发生验证码
+      sendEmail() {
+        if (!this.emailReg.test(this.pwdForm.email)) {
+          this.$message.warning('请输入合法邮箱')
+          this.$refs.rulePwdForm.validateField('email');
+          return
+        }
+        // 清空定时器
+        if (this.interval >= 0) {
+          clearInterval(this.interval)
+        }
+        this.time = 60
+        this.interval = setInterval(() => {
+          if (this.time > 0) {
+            this.time--
+          }
+        }, 1000)
+
+        request.get('/email', {
+          params: {
+            email: this.form.email,
+            type: "RESET_PASSWORD"
+          }
+        }).then(res => {
+          if (res.code === '200') {
+            this.$message.success("发送成功")
+          } else if (res.code === '400') {
+            this.$message.warning(res.msg)
+          } else {
+            this.$message.error("未知异常")
+          }
+        })
+      },
+      // 重置密码
+      resetPwd() {
+        request.put('/reset/password', {
+          data: JSON.stringify(this.pwdForm)
+        }).then(res => {
+          if (res.code === '200') {
+            // 这种方式并不友好, 建议使用 Element-ui的Steps 步骤条 组件实现
+            // 先验证 邮箱身份, 验证成功则进行修改密码步骤
+            // 验证邮箱失败(邮箱不存在的情况) 让用户继续停留在这个页面,并且给出对应的提示, 提供一个去注册的按钮
+            this.$message.success("以为您重置密码! 密码为: " + res.data)
+          } else if (res.code === '400') {
+            this.$message.warning(res.msg)
+          } else {
+            this.$message.error("未知异常")
+          }
+        })
+      },
+      resetResetPwdDialog() {
+        this.pwdForm = {
+          email: '',
+          code: ''
+        }
+        this.$refs.rulePwdForm.resetFields()
       }
     }
   }
@@ -66,7 +140,7 @@
 
           <el-input
               v-model="form.username"
-              placeholder="请输入账号"
+              placeholder="请输入账号或邮箱"
               prefix-icon="el-icon-user"
               status-icon
           >
@@ -87,11 +161,49 @@
         <div style="margin-bottom: 0.83em">
           <el-button style="width: 100%" type="primary" @click="login" @keyup.enter="login">登录</el-button>
         </div>
-        <div style="text-align: right;">
+        <div style="display: flex; justify-content: space-between">
+          <el-button type="text" link @click.prevent="pwdVis = true">忘记密码</el-button>
           <el-button type="text" @click="$router.push('/register')">没有账号?请注册</el-button>
         </div>
       </el-form>
     </div>
+
+    <el-dialog
+        title="修改密码"
+        :visible.sync="pwdVis"
+        :destroy-on-close="true"
+        @closed="resetResetPwdDialog"
+        :close-on-click-modal="false"
+    >
+      <el-form :model="pwdForm" ref="rulePwdForm" :rules="rulePwds" status-icon>
+        <el-form-item prop="email" label="邮箱" label-width="120px">
+          <el-input
+              v-model="pwdForm.email" autocomplete="off"
+              prefix-icon="el-icon-message"
+              clearable
+              status-icon
+          ></el-input>
+        </el-form-item>
+        <el-form-item prop="code" label="验证码" label-width="120px">
+          <div style="display: flex">
+            <el-input v-model="pwdForm.code" placeholder="请输入验证码" clearable style="flex: 1"></el-input>
+            <el-button
+                type="primary"
+                plain
+                @click.prevent="sendEmail"
+                :disabled="time > 0"
+                style="width: 120px; margin-left: 5px"
+            >
+              点击发送 <span v-show="time"> ({{ time }}) </span>
+            </el-button>
+          </div>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="pwdVis = false">取 消</el-button>
+        <el-button type="primary" @click="resetPwd">确 认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 

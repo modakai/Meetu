@@ -26,7 +26,7 @@ public class CodeGenerator {
     /**
      * 表名
      */
-    private static final String TABLE = "sys_user";
+    private static final String TABLE = "dynamic";
     /**
      * 菜单名称
      */

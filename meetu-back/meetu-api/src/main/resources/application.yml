@@ -7,6 +7,16 @@ spring:
     url: jdbc:mysql://localhost:3306/meetu?serverTimezone=Asia/Shanghai&useSSL=false&characterEncoding=UTF-8
     username: root
     password: 123abc
+    hikari:
+      # 连接池中允许的最小连接数
+      minimum-idle: 5
+      # 连接池中允许的最大连接数
+      maximum-pool-size: 10
+      # 一个连接idle状态的最大时长（毫秒），超时则被释放（retired）
+      idle-timeout: 30000
+      # 一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired）
+      max-lifetime: 1800000
+      keepalive-time: 3000
   application:
     name: MeetU
   main:
@@ -20,6 +30,28 @@ spring:
       matching-strategy: ant_path_matcher
     servlet:
       load-on-startup: 1 # 启动时初始化 DispatcherServlet
+  mail:
+    # 配置 SMTP 服务器地址
+    host: smtp.qq.com
+    # 发送者邮箱
+    username: 2049202552@qq.com
+    # 配置密码，注意不是真正的密码，而是刚刚申请到的授权码
+    password: jvoiovisajmkbijh
+    # 端口号465或587
+    port: 587
+    # 默认的邮件编码为UTF-8
+    default-encoding: UTF-8
+  rabbitmq:
+    host: 192.168.205.131
+    port: 5672
+    virtual-host: meetu
+    username: sakura
+    password: k01225.k
+    listener:
+      simple:
+        acknowledge-mode: manual
+    publisher-confirm-type: correlated
+
 # mybatis-plus 区
 mybatis-plus:
   configuration:
@@ -27,3 +59,11 @@ mybatis-plus:
     cache-enabled: true
   global-config:
     banner: off
+    db-config:
+      logic-delete-field: deleted
+      logic-not-delete-value: 0
+      logic-delete-value: id
+  mapper-locations: classpath:/mapper/*.xml
+logging:
+  level:
+    com.sakura.meetu: debug
