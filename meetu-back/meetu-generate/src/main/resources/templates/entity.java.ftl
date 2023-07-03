@@ -3,7 +3,7 @@ package ${package.Entity};
 <#list table.importPackages as pkg>
 import ${pkg};
 </#list>
-
+import cn.hutool.core.annotation.Alias;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -26,24 +26,24 @@ import lombok.experimental.Accessors;
 * @since ${date}
 */
 <#if entityLombokModel>
-    @Getter
-    @Setter
-    <#if chainModel>
-        @Accessors(chain = true)
-    </#if>
+@Getter
+@Setter
+<#if chainModel>
+@Accessors(chain = true)
+</#if>
 </#if>
 <#if table.convert>
-    @TableName("${schemaName}${table.name}")
+@TableName("${schemaName}${table.name}")
 </#if>
 @ApiModel(value = "${entity}对象", description = "${table.comment!}")
 <#if superEntityClass??>
-    public class ${entity} extends ${superEntityClass}<#if activeRecord><${entity}></#if> {
+public class ${entity} extends ${superEntityClass}<#if activeRecord><${entity}></#if> {
 <#elseif activeRecord>
-    public class ${entity} extends Model<${entity}> {
+public class ${entity} extends Model<${entity}> {
 <#elseif entitySerialVersionUID>
-    public class ${entity} implements Serializable {
+public class ${entity} implements Serializable {
 <#else>
-    public class ${entity} {
+public class ${entity} {
 </#if>
 <#if entitySerialVersionUID>
 
@@ -57,9 +57,7 @@ import lombok.experimental.Accessors;
 
     <#if field.comment!?length gt 0>
         <#if swagger>
-            /**
-                ${field.comment}
-            */
+            // ${field.comment}
             @ApiModelProperty("${field.comment}")
             @Alias("${field.comment}")
         </#if>
@@ -96,43 +94,31 @@ import lombok.experimental.Accessors;
     </#if>
     private ${field.propertyType} ${field.propertyName};
 </#list>
-
-<#list table.fields as field>
-
-    public ${field.propertyType} get${field.capitalName}() {
-        return ${field.propertyName};
-    }
-
-    public void set${field.capitalName}(${field.propertyType} ${field.propertyName}) {
-        this.${field.propertyName} = ${field.propertyName};
-    }
-</#list>
-
 <#------------  END 字段循环遍历  ---------->
-<#--<#if !entityLombokModel>-->
-<#--    <#list table.fields as field>-->
-<#--        <#if field.propertyType == "boolean">-->
-<#--            <#assign getprefix="is"/>-->
-<#--        <#else>-->
-<#--            <#assign getprefix="get"/>-->
-<#--        </#if>-->
+<#if !entityLombokModel>
+    <#list table.fields as field>
+        <#if field.propertyType == "boolean">
+            <#assign getprefix="is"/>
+        <#else>
+            <#assign getprefix="get"/>
+        </#if>
 
-<#--        public ${field.propertyType} ${getprefix}${field.capitalName}() {-->
-<#--            return ${field.propertyName};-->
-<#--        }-->
+        public ${field.propertyType} ${getprefix}${field.capitalName}() {
+            return ${field.propertyName};
+        }
 
-<#--        <#if chainModel>-->
-<#--            public ${entity} set${field.capitalName}(${field.propertyType} ${field.propertyName}) {-->
-<#--        <#else>-->
-<#--            public void set${field.capitalName}(${field.propertyType} ${field.propertyName}) {-->
-<#--        </#if>-->
-<#--        this.${field.propertyName} = ${field.propertyName};-->
-<#--        <#if chainModel>-->
-<#--            return this;-->
-<#--        </#if>-->
-<#--        }-->
-<#--    </#list>-->
-<#--</#if>-->
+        <#if chainModel>
+            public ${entity} set${field.capitalName}(${field.propertyType} ${field.propertyName}) {
+        <#else>
+            public void set${field.capitalName}(${field.propertyType} ${field.propertyName}) {
+        </#if>
+                this.${field.propertyName} = ${field.propertyName};
+        <#if chainModel>
+                return this;
+        </#if>
+            }
+    </#list>
+</#if>
 <#if entityColumnConstant>
     <#list table.fields as field>
 
@@ -140,6 +126,7 @@ import lombok.experimental.Accessors;
     </#list>
 </#if>
 <#if activeRecord>
+
     @Override
     public Serializable pkVal() {
     <#if keyPropertyName??>
@@ -149,31 +136,7 @@ import lombok.experimental.Accessors;
     </#if>
     }
 </#if>
-<#--<#if !entityLombokModel>-->
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        ${entity} ${entity?lower_case} = (${entity}) o;
-        <#list table.fields as field>
-            <#if !field.keyFlag>
-                if (!Objects.equals(${field.propertyName}, ${entity?lower_case}.${field.propertyName})) return false;
-            </#if>
-        </#list>
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(<#list table.fields as field><#if !field.keyFlag>${field.propertyName}, </#if></#list>);
-    }
-
+<#if !entityLombokModel>
 
     @Override
     public String toString() {
@@ -187,5 +150,5 @@ import lombok.experimental.Accessors;
     </#list>
     "}";
     }
-<#--</#if>-->
+</#if>
 }

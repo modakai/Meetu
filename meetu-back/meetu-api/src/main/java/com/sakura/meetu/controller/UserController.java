@@ -1,33 +1,28 @@
 package com.sakura.meetu.controller;
 
 
-import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletOutputStream;
-import java.net.URLEncoder;
-
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.sakura.meetu.utils.Result;
-import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
-import java.io.InputStream;
-import java.util.List;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-
-import org.springframework.web.multipart.MultipartFile;
-import com.sakura.meetu.service.IUserService;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sakura.meetu.entity.User;
+import com.sakura.meetu.service.IUserService;
+import com.sakura.meetu.utils.Result;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.web.bind.annotation.RestController;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author sakura
@@ -37,43 +32,53 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user")
 public class UserController {
 
-    @Resource
-    private IUserService userService;
+    private final IUserService userService;
 
+    public UserController(IUserService userService) {
+        this.userService = userService;
+    }
+
+    @ApiOperation(value = "保存用户")
     @PostMapping
     public Result save(@RequestBody User user) {
         userService.save(user);
         return Result.success();
     }
 
+    @ApiOperation(value = "更新用户")
     @PutMapping
     public Result update(@RequestBody User user) {
         userService.updateById(user);
         return Result.success();
     }
 
+    @ApiOperation(value = "修改用户")
     @DeleteMapping("/{id}")
     public Result delete(@PathVariable Integer id) {
         userService.removeById(id);
         return Result.success();
     }
 
+    @ApiOperation(value = "批量删除用户")
     @PostMapping("/del/batch")
     public Result deleteBatch(@RequestBody List<Integer> ids) {
         userService.removeByIds(ids);
         return Result.success();
     }
 
+    @ApiOperation(value = "查询全部用户")
     @GetMapping
     public Result findAll() {
         return Result.success(userService.list());
     }
 
+    @ApiOperation(value = "根据ID查询全部用户")
     @GetMapping("/{id}")
     public Result findOne(@PathVariable Integer id) {
         return Result.success(userService.getById(id));
     }
 
+    @ApiOperation(value = "分页查询")
     @GetMapping("/page")
     public Result findPage(@RequestParam(defaultValue = "") String name,
                            @RequestParam Integer pageNum,
@@ -86,6 +91,7 @@ public class UserController {
     /**
      * 导出接口
      */
+    @ApiOperation(value = "导出用户数据")
     @GetMapping("/export")
     public void export(HttpServletResponse response) throws Exception {
         // 从数据库查询出所有的数据
@@ -98,7 +104,7 @@ public class UserController {
 
         // 设置浏览器响应的格式
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-        String fileName = URLEncoder.encode("User信息表", "UTF-8");
+        String fileName = URLEncoder.encode("User信息表", StandardCharsets.UTF_8);
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
 
         ServletOutputStream out = response.getOutputStream();
@@ -114,6 +120,7 @@ public class UserController {
      * @param file
      * @throws Exception
      */
+    @ApiOperation(value = "导入用户数据")
     @PostMapping("/import")
     public Result imp(MultipartFile file) throws Exception {
         InputStream inputStream = file.getInputStream();

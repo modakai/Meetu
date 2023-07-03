@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- *  全局异常类
+ * 全局异常类
+ *
  * @author sakura
  * @create 2023/5/21 20:33
  */
@@ -28,6 +29,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public Result exceptionError(Exception e) {
         log.error("未知错误", e);
-        return Result.error("未知错误");
+        return Result.error(e.getMessage());
     }
 }

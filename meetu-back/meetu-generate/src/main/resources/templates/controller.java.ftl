@@ -50,8 +50,12 @@ public class ${table.controllerName} extends ${superControllerClass} {
 public class ${table.controllerName} {
     </#if>
 
-    @Resource
-    private ${table.serviceName} ${table.entityPath}Service;
+<#--    @Resource-->
+    private final ${table.serviceName} ${table.entityPath}Service;
+
+    public ${table.controllerName}(${table.serviceName} ${table.entityPath}Service) {
+        this.${table.entityPath}Service = ${table.entityPath}Service;
+    }
 
     @PostMapping
 <#--    @SaCheckPermission("${table.entityPath}.add")-->

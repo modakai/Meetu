@@ -13,11 +13,16 @@ import java.util.Properties;
 
 /**
  * 代码生成器
+ *
  * @author sakura
  * @create 2023/5/21 21:02
  */
 public class CodeGenerator {
-
+    public static final String MAPPER_XML_PATH = "/src/main/resources/mapper/";
+    /**
+     * 指定放在那个目录中
+     */
+    public static final String JAVA_CODE_PATH = "/src/main/java/";
     /**
      * 表名
      */
@@ -26,28 +31,18 @@ public class CodeGenerator {
      * 菜单名称
      */
     private static final String MODULE_NAME = "动态";
-
     /**
-     *  java代码的包名
+     * java代码的包名
      */
     private static final String PACKAGE_NAME = "com.sakura.meetu";
-
     /**
      * 作者
      */
     private static final String AUTHOR = "sakura";
-
     /**
      * 生成代码的路径 父级
      */
     private static final String PROJECT_PATH = System.getProperty("user.dir") + "/meetu-generate";
-
-    public static final String MAPPER_XML_PATH = "/src/main/resources/mapper/";
-
-    /**
-     * 指定放在那个目录中
-     */
-    public static final String JAVA_CODE_PATH = "/src/main/java/";
 
     public static void main(String[] args) {
         generateJava(TABLE);

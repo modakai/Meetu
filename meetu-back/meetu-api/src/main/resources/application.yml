@@ -4,7 +4,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/meetu?serviceTimezone=GMT+8&useSSL=false&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/meetu?serverTimezone=Asia/Shanghai&useSSL=false&characterEncoding=UTF-8
     username: root
     password: 123abc
   application:

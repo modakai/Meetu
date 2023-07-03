@@ -2,6 +2,7 @@ package com.sakura.meetu.service;
 
 import com.sakura.meetu.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sakura.meetu.utils.Result;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserService extends IService<User> {
 
+    Result login(User user);
 }
