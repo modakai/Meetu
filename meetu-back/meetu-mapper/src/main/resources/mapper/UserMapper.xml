@@ -2,31 +2,4 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sakura.meetu.mapper.UserMapper">
     <cache flushInterval="60000"/>
-    <select id="selectUserOne" resultType="com.sakura.meetu.entity.User">
-        SELECT id,
-               username,
-               `password`,
-               NAME,
-               email,
-               uid,
-               deleted,
-               create_time,
-               update_time
-        FROM sys_user
-        WHERE deleted = 0
-          AND username = #{username}
-        UNION
-        SELECT id,
-               username,
-               `password`,
-               NAME,
-               email,
-               uid,
-               deleted,
-               create_time,
-               update_time
-        FROM sys_user
-        WHERE deleted = 0
-            AND email = #{username}
-    </select>
 </mapper>

@@ -1,5 +1,9 @@
 package com.sakura.meetu.dto;
 
+import com.sakura.meetu.validation.EmailLoginGroup;
+import com.sakura.meetu.validation.LoginGroup;
+import com.sakura.meetu.validation.SaveGroup;
+import com.sakura.meetu.validation.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -25,26 +29,36 @@ public class UserDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("用户名")
-    @NotBlank(message = "用户名不能为空")
-    @Length(min = 3, max = 16, message = "用户名请输入在3~16个字符之间")
+    @NotBlank(message = "用户名不能为空", groups = {LoginGroup.class, SaveGroup.class})
+    @Length(min = 3, max = 16, message = "用户名请输入在3~16个字符之间", groups = {LoginGroup.class, SaveGroup.class})
     private String username;
 
     @ApiModelProperty("密码")
-    @NotBlank(message = "密码不能为空")
+    @NotBlank(message = "密码不能为空", groups = {LoginGroup.class, SaveGroup.class})
     private String password;
 
     @ApiModelProperty("邮箱")
-    @NotBlank(message = "邮箱不能为空")
+    @NotBlank(message = "邮箱不能为空", groups = {EmailLoginGroup.class, SaveGroup.class})
     @Pattern(
             regexp = "/^\\w+((.\\w+)|(-\\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/",
-            message = "邮箱格式不正确"
+            message = "邮箱格式不正确",
+            groups = {EmailLoginGroup.class, UpdateGroup.class, SaveGroup.class}
     )
     private String email;
 
     @ApiModelProperty("验证码")
-    @NotBlank(message = "验证码不能为空")
+    @NotBlank(
+            message = "验证码不能为空",
+            groups = {EmailLoginGroup.class, SaveGroup.class, UpdateGroup.class}
+    )
     private String code;
 
     @ApiModelProperty("用户昵称")
     private String name;
+
+    @NotBlank(
+            message = "验证类型不能为空",
+            groups = {EmailLoginGroup.class, SaveGroup.class, UpdateGroup.class}
+    )
+    private String type;
 }

@@ -20,7 +20,7 @@ const router = new VueRouter({
             component: () => import('@/views/Register.vue')
         },
         {
-            path: '/404',
+            path: '/*',
             component: () => import('@/views/404.vue')
         }
     ]

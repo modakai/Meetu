@@ -3,7 +3,8 @@ import {defineStore} from "pinia";
 export const useUserStore = defineStore('user', {
     // 表示 user 对象
     state: () => ({
-        userInfo: {}
+        userInfo: {},
+        Authorization: ''
     }),
     // 用于操作 state中的数据
     actions: {

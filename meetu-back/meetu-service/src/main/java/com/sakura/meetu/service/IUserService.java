@@ -20,4 +20,6 @@ public interface IUserService extends IService<User> {
     Result register(UserDto userDto);
 
     Result sendEmail(String email, String type);
+
+    Result emailLogin(UserDto userDto);
 }

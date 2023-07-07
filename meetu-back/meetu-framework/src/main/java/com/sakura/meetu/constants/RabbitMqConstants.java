@@ -16,5 +16,13 @@ public interface RabbitMqConstants {
      */
     String EMAIL_QUEUE_ROUTER_KEY = "send";
 
+    /**
+     * 邮箱交换机的名称
+     */
     String EMAIL_QUEUE_NAME = "meetu-email-normal";
+
+    /**
+     * 邮箱死信队列的名称
+     */
+    String EMAIL_DEAD_QUEUE_NAME = "meetu-email-dead";
 }

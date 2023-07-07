@@ -46,13 +46,16 @@
 
           if (valid) {
             // 返回 true 则说明校验成功
-            request.post("/login", this.form).then(res => {
+            request.post("/normal/login", this.form).then(res => {
               if (res.code === '200') {
                 this.$message.success("登入成功")
                 const store = useUserStore()
                 // TODO 后期存储 TOKEN
-                store.$patch({userInfo: res.data})
-
+                store.$patch({
+                  userInfo: res.data.userInfo,
+                  Authorization: res.data.Authorization
+                })
+                console.log(store)
                 this.$router.push("/")
               } else {
                 this.$message.error(res.msg)

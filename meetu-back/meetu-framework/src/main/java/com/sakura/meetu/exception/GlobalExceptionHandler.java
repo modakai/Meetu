@@ -1,5 +1,6 @@
 package com.sakura.meetu.exception;
 
+import cn.dev33.satoken.exception.SaTokenException;
 import cn.hutool.core.util.StrUtil;
 import com.sakura.meetu.utils.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(SaTokenException.class)
+    public Result handleSaTokenException(SaTokenException e) {
+        log.info("权限异常: {}", e.getMessage(), e);
+        return Result.error(Result.CODE_ERROR_401, "权限不足");
+    }
 
     @ExceptionHandler(value = ServiceException.class)
     public Result handleServiceException(ServiceException e) {

@@ -1,5 +1,6 @@
 import { Message } from 'element-ui';
 import axios from "axios";
+import router from "@/router";
 // import { useUserStore } from "@/stores/user";
 
 const request = axios.create({
@@ -34,7 +35,7 @@ request.interceptors.response.use(
         // 当权限验证不通过的时候给出提示
         if (res.code === '401') {
             Message.error(res.msg);
-            this.$router.push("/login")
+            router.push("/login")
         }
         return res;
     },
