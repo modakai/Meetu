@@ -1,7 +1,7 @@
 package com.sakura.meetu.config;
 
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.http.HttpRequest;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.RedisUtils;
@@ -31,7 +31,9 @@ public class InitRunner implements ApplicationRunner {
         ThreadUtil.execAsync(() -> {
             // 帮我在项目启动的时候查询一次数据库，防止数据库的懒加载
             User user = userService.getById(1);
-            HttpUtil.get("http://localhost:8848/active");
+            HttpRequest.get("http://localhost:8848/active")
+                    .header("Content-Type", "application/json;charset=utf-8");
+            redisUtils.keys("1");
             log.info("启动项目数据库连接查询成功");
         });
     }

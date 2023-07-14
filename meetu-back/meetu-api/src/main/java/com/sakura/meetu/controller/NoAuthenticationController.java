@@ -1,7 +1,6 @@
 package com.sakura.meetu.controller;
 
 import com.sakura.meetu.dto.UserDto;
-import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.validation.EmailLoginGroup;
@@ -33,26 +32,22 @@ public class NoAuthenticationController {
         return "success";
     }
 
+    @PostMapping("/api/normal/login")
+    public Result normalLogin(@RequestBody @Validated(LoginGroup.class) UserDto loginUserDto) {
+        return userService.normalLogin(loginUserDto);
+    }
+
+    @PostMapping("/api/email/login")
+    public Result emailLogin(@RequestBody @Validated(EmailLoginGroup.class) UserDto loginUserDto) {
+        return userService.emailLogin(loginUserDto);
+    }
+
     @ApiOperation(value = "邮箱服务")
     @GetMapping("/api/email")
     public Result sendEmail(@RequestParam String email, @RequestParam String type) {
         return userService.sendEmail(email, type);
     }
 
-    @ApiOperation(value = "用户普通登入接口")
-    @PostMapping("/api/normal/login")
-    public Result login(@RequestBody @Validated(LoginGroup.class) UserDto userDto) {
-        User user = new User();
-        user.setUsername(userDto.getUsername());
-        user.setPassword(userDto.getPassword());
-        return userService.login(user);
-    }
-
-    @ApiOperation(value = "用户邮箱登入接口")
-    @PostMapping("/api/email/login")
-    public Result emailLogin(@RequestBody @Validated(EmailLoginGroup.class) UserDto userDto) {
-        return userService.emailLogin(userDto);
-    }
 
     @ApiOperation(value = "用户注册接口")
     @PostMapping("/api/register")

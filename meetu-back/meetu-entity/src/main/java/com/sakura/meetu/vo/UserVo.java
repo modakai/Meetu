@@ -44,4 +44,7 @@ public class UserVo implements Serializable {
     @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
     private LocalDateTime createTime;
 
+
+    private String Authorization;
+
 }

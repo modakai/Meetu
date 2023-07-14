@@ -2,4 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sakura.meetu.mapper.UserMapper">
     <cache flushInterval="60000"/>
+
+    <sql id="all">
+        id, uid, username, `password`, `name`, email, create_time, update_time, deleted
+    </sql>
+
+    <select id="selectOneByUsernameEmail" resultType="com.sakura.meetu.entity.User">
+        SELECT
+            <include refid="all"/>
+        FROM `sys_user`
+        WHERE
+            username = #{username}
+        UNION
+        SELECT
+            <include refid="all"/>
+        FROM
+            sys_user
+        WHERE
+            email = #{username}
+    </select>
 </mapper>

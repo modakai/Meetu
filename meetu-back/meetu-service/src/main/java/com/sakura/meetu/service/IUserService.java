@@ -15,11 +15,12 @@ import com.sakura.meetu.utils.Result;
  */
 public interface IUserService extends IService<User> {
 
-    Result login(User user);
 
     Result register(UserDto userDto);
 
     Result sendEmail(String email, String type);
 
-    Result emailLogin(UserDto userDto);
+    Result normalLogin(UserDto loginUserDto);
+
+    Result emailLogin(UserDto loginUserDto);
 }

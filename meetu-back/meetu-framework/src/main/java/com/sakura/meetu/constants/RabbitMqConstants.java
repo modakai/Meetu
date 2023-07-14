@@ -8,7 +8,7 @@ package com.sakura.meetu.constants;
  */
 public interface RabbitMqConstants {
     /**
-     * 邮箱队列
+     * 邮箱服务交换机名称
      */
     String EMAIL_EXCHANGE_NAME = "meetu-email";
     /**
@@ -17,9 +17,9 @@ public interface RabbitMqConstants {
     String EMAIL_QUEUE_ROUTER_KEY = "send";
 
     /**
-     * 邮箱交换机的名称
+     * 发布邮箱队列名称
      */
-    String EMAIL_QUEUE_NAME = "meetu-email-normal";
+    String EMAIL_QUEUE_NAME = "meetu-email-send";
 
     /**
      * 邮箱死信队列的名称

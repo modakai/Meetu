@@ -9,4 +9,7 @@ package com.sakura.meetu.constants;
 public interface SaTokenConstant {
 
     String CACHE_LOGIN_USER_KEY = "userInfo";
+
+    String LOGIN_USER_TYPE_APP = "APP";
+    String LOGIN_USER_TYPE_PC = "PC";
 }

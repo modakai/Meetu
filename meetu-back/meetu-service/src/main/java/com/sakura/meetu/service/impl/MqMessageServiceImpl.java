@@ -147,7 +147,7 @@ public class MqMessageServiceImpl implements MqMessageService {
         } catch (IOException e) {
             log.error("重新向 {} 发送邮件失败: {}", message.get("email"), e.getMessage());
             // 发送失败，将消息重新放入死信队列（可选择是否重新回滚队列）
-            boolean requeue = false;  // 设置为 true 表示重新回滚队列
+            boolean requeue = true;  // 设置为 true 表示重新回滚队列
             try {
                 channel.basicNack(deliveryTag, false, requeue);
             } catch (IOException ex) {

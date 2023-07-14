@@ -22,11 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.sakura.meetu.constants.Constant.EMAIL_TYPE_REGISTER;
@@ -40,6 +37,7 @@ import static com.sakura.meetu.constants.Constant.EMAIL_TYPE_REGISTER;
  * @since 2023-05-21
  */
 @Service
+@Transactional
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -54,51 +52,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         this.redisUtils = redisUtils;
     }
 
-    @Override
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    public Result login(User user) {
-        // 查询用户
-        User result;
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
-                .eq(StrUtil.isNotBlank(user.getUsername()), User::getUsername, user.getUsername())
-                .eq(StrUtil.isNotBlank(user.getEmail()), User::getEmail, user.getEmail());
-        try {
-            // 放在 Mysql 服务器宕机 导致无法查询出用户
-            // 根据邮箱或者 用户名查询用户
-            result = userMapper.selectOne(queryWrapper);
-        } catch (Exception e) {
-            log.error("数据库出现异常: {}", e.getMessage(), e);
-            throw new RuntimeException("系统异常");
-        }
-
-        if (result == null) {
-            return Result.error(Result.CODE_ERROR_404, "用户不存在");
-        }
-        // 解密密码
-        if (!PasswordEncoderUtil.matches(user.getPassword(), result.getPassword())) {
-            return Result.error(Result.CODE_ERROR_400, "密码错误");
-        }
-
-        // TODO 效率问题 耗时了 506 毫秒
-        StpUtil.login(result.getUid());
-        StpUtil.getSession().set(SaTokenConstant.CACHE_LOGIN_USER_KEY, result);
-        String tokenValue = StpUtil.getTokenInfo().getTokenValue();
-
-        UserVo data = UserVo.builder()
-                .uid(result.getUid())
-                .username(result.getUsername())
-                .email(result.getEmail())
-                .createTime(result.getCreateTime())
-                .build();
-        Map<String, Object> resultMap = new HashMap<>(4);
-        resultMap.put("userInfo", data);
-        resultMap.put("Authorization", tokenValue);
-        return Result.success(resultMap);
-    }
 
     @Override
     public Result register(UserDto userDto) {
-        String redisCodeKey = verificationCode(userDto);
+        verificationCode(userDto);
 
         // 获取 IoC 代理对象
         UserServiceImpl currentProxy = (UserServiceImpl) AopContext.currentProxy();
@@ -108,8 +65,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return Result.error(Result.CODE_ERROR_400, "账户或者邮箱已被注册! 如果已忘记密码可以进行找回密码哟!");
         }
         UserVo userVo = BeanUtil.copyBean(user, UserVo.class);
-        // 注册成功删除验证码
-        redisUtils.delete(redisCodeKey);
+
         return Result.success(userVo);
     }
 
@@ -153,19 +109,76 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.success();
     }
 
+    /**
+     * 普通登入
+     * 邮箱 + 密码 或者 用户名 + 密码 两种形式
+     *
+     * @param loginUserDto 登入信息
+     * @return 登入的结果
+     */
     @Override
-    public Result emailLogin(UserDto userDto) {
-        verificationCode(userDto);
-        User user = new User();
-        user.setEmail(userDto.getEmail());
-        return login(user);
+    public Result normalLogin(UserDto loginUserDto) {
+        // 1 编写条件
+        User user = userMapper.selectOneByUsernameEmail(loginUserDto.getUsername());
+
+        // 2 比较密码
+        if (!PasswordEncoderUtil.matches(loginUserDto.getPassword(), user.getPassword())) {
+            return Result.error(Result.CODE_ERROR_400, "密码错误");
+        }
+
+        // 3 登入成功
+        return login(user, loginUserDto.getLoginType());
     }
+
+    @Override
+    public Result emailLogin(UserDto loginUserDto) {
+        // 校验验证码
+        verificationCode(loginUserDto);
+
+        // 邮箱登入
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+                .eq(User::getEmail, loginUserDto.getEmail());
+        User result = getOne(queryWrapper);
+        // sa-token 登入
+        return login(result, loginUserDto.getLoginType());
+    }
+
+
+    public Result login(User user, String loginType) {
+        switch (loginType) {
+            case SaTokenConstant.LOGIN_USER_TYPE_PC:
+                StpUtil.login(user.getUid(), SaTokenConstant.LOGIN_USER_TYPE_PC);
+                break;
+            case SaTokenConstant.LOGIN_USER_TYPE_APP:
+                StpUtil.login(user.getUid(), SaTokenConstant.LOGIN_USER_TYPE_APP);
+                break;
+            default:
+                return Result.error(Result.CODE_ERROR_400, "登入类型有误");
+        }
+
+        StpUtil.getSession().set(SaTokenConstant.CACHE_LOGIN_USER_KEY, user);
+        String token = StpUtil.getTokenInfo().getTokenValue();
+        UserVo result = UserVo.builder()
+                .uid(user.getUid())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .createTime(user.getCreateTime())
+                .Authorization(token)
+                .build();
+        log.info("当前登入用户: {} 在 {} 端登入, 登入时间: {} ",
+                result.getUsername(), loginType, result.getCreateTime());
+        return Result.success(result);
+    }
+
 
     @Transactional(rollbackFor = ServiceException.class)
     public User saveUser(UserDto userDto) {
         // 转换对象
         final User user = BeanUtil.copyBean(userDto, User.class);
-        User one = userMapper.selectUserOne(user);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+                .eq(StrUtil.isNotBlank(user.getUsername()), User::getUsername, user.getUsername())
+                .eq(StrUtil.isNotBlank(user.getEmail()), User::getEmail, user.getEmail());
+        User one = userMapper.selectOne(queryWrapper);
         if (ObjectUtil.isNotEmpty(one)) {
             log.info("用户注册账号已存在: {} 或 邮箱已被注册: {}", one.getUsername(), one.getEmail());
             return null;
@@ -188,7 +201,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return user;
     }
 
-    public String verificationCode(UserDto userDto) {
+    /**
+     * 校验 用户输入的验证码
+     *
+     * @param userDto 用户登入信息
+     * @throws ServiceException 验证码不符合系统规定类型 或者 错误 以及为获取验证码都会抛出 该异常
+     */
+    public void verificationCode(UserDto userDto) {
         // 验证邮箱类型
         String emailTypeValue = EmailCodeEnum
                 .getValue(userDto.getType())
@@ -203,11 +222,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new ServiceException(Result.CODE_ERROR_400, "请先获取验证码");
         }
         if (!redisCode.equalsIgnoreCase(userDto.getCode())) {
-            // 删除验证码
-            redisUtils.delete(redisCodeKey);
             throw new ServiceException(Result.CODE_ERROR_400, "验证码错误");
         }
-
-        return redisCodeKey;
+        // 删除验证码
+        redisUtils.delete(redisCodeKey);
     }
 }

@@ -1,7 +1,7 @@
 package com.sakura.meetu.test.servicetes;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.RedisUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -24,13 +24,7 @@ public class UserServiceTest {
     @Test
     @DisplayName("测试用户登入")
     void testUserLogin() {
-        User user = new User();
-        user.setUsername("admin");
-        user.setPassword("123abc");
-        long start = System.currentTimeMillis();
-        userService.login(user);
-        long end = System.currentTimeMillis();
-        System.out.println(end - start);
+        StpUtil.login(12312);
     }
 
     @Test

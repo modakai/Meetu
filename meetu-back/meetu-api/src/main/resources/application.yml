@@ -16,7 +16,6 @@ spring:
       idle-timeout: 30000
       # 一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired）
       max-lifetime: 1800000
-      keepalive-time: 3000
   application:
     name: MeetU
   main:
@@ -42,11 +41,11 @@ spring:
     # 默认的邮件编码为UTF-8
     default-encoding: UTF-8
   rabbitmq:
-    host: 192.168.205.131
+    host: localhost
     port: 5672
-    virtual-host: meetu
+    virtual-host: sakura-meetu
     username: sakura
-    password: k01225.k
+    password: k01225k
     listener:
       simple:
         acknowledge-mode: manual
@@ -54,14 +53,14 @@ spring:
   redis:
     port: 6379
     database: 0
-    host: 192.168.205.131
+    host: localhost
     timeout: 10s
     password: 123abc
     # 连接超时
     lettuce:
       pool:
         # 连接池最大连接数
-        max-active: 20
+        max-active: 200
         # 连接池最大空闲连接
         max-idle: 10
         # 连接池中的最小空间连接
@@ -95,13 +94,18 @@ sa-token:
   # token风格
   #  token-style: simple-uuid
   # 是否输出操作日志
-  is-log: false
+  is-log: true
   # 令牌前缀
   token-prefix: Bearer
   # jwt 密钥
   jwt-secret-key: uiournawutojawlkqpoo[]o[31
+  # 在每次创建 Token 时的最高循环次数，用于保证 Token 唯一性
+  max-try-times: -1
   # 不打印版本
   is-print: off
+  is-read-body: off
+  is-read-cookie: off
+  is-write-header: off
 logging:
   level:
     com.sakura.meetu: debug
