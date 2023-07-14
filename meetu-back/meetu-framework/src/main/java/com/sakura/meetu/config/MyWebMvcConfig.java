@@ -22,7 +22,6 @@ public class MyWebMvcConfig extends WebMvcConfigurationSupport {
         registry.addInterceptor(new SaInterceptor(handler -> StpUtil.checkLogin()))
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        "/active",
                         "/api/normal/login",
                         "/api/email/login",
                         "/api/register",

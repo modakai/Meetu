@@ -53,9 +53,8 @@ spring:
   redis:
     port: 6379
     database: 0
-    host: localhost
+    host: 127.0.0.1
     timeout: 10s
-    password: 123abc
     # 连接超时
     lettuce:
       pool:
