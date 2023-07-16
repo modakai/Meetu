@@ -27,6 +27,7 @@ public class NoAuthenticationController {
         this.userService = userService;
     }
 
+    
     @GetMapping("/api/testLogin")
     public String testLogin() {
         return "success";

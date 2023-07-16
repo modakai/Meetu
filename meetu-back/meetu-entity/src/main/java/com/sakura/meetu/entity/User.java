@@ -69,6 +69,14 @@ public class User implements Serializable {
     @Alias("唯一标识")
     private String uid;
 
+
+    /**
+     * 用户头像
+     */
+    @ApiModelProperty("用户头像")
+    @Alias("用户头像")
+    private String avatar;
+
     /**
      * 逻辑删除
      */

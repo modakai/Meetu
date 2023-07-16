@@ -3,6 +3,8 @@ package com.sakura.meetu.filter;
 import cn.hutool.json.JSONUtil;
 import com.sakura.meetu.utils.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -47,9 +49,10 @@ public class ApiCurrentLimitingFilter implements Filter {
             if (count > door) {
                 log.info("接口限制, count: {}", count);
                 HttpServletResponse response = (HttpServletResponse) servletResponse;
-                response.setContentType("application/json;charset=utf-8");
+                response.setStatus(HttpStatus.OK.value());
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-                response.getWriter().println(JSONUtil.parse(Result.error("-1", "请勿频繁访问接口")));
+                response.getWriter().println(JSONUtil.parse(Result.error(Result.CODE_ERROR_402, "请勿频繁访问接口")));
                 return;
             }
         } else {

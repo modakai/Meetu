@@ -68,6 +68,10 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
     locale: zh_CN
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 10MB
 # mybatis-plus 区
 mybatis-plus:
   configuration:
@@ -86,10 +90,10 @@ sa-token:
   token-name: Authorization
   # token有效期，单位s 默认30天, -1代表永不过期  2小时6
   timeout: 7200
-  # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
-  is-concurrent: true
+  # 是否允许同一账号并发登录 (为true时允许一起登录, 为 false 时新登录挤掉旧登录)
+  is-concurrent: false
   # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
-  is-share: true
+  is-share: false
   # token风格
   #  token-style: simple-uuid
   # 是否输出操作日志
@@ -105,6 +109,14 @@ sa-token:
   is-read-body: off
   is-read-cookie: off
   is-write-header: off
+# 阿里云 存储
+aliyun:
+  oss:
+    file:
+      endpoint: oss-cn-shenzhen.aliyuncs.com
+      keyid: LTAI5tBVPZhygaHirgeJZYGc
+      keysecret: jQZBApROc82Cj6yapnbFKF2fiGitHi
+      bucketname: sakura-meetu
 logging:
   level:
     com.sakura.meetu: debug

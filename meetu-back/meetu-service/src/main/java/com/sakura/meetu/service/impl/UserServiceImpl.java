@@ -120,6 +120,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public Result normalLogin(UserDto loginUserDto) {
         // 1 编写条件
         User user = userMapper.selectOneByUsernameEmail(loginUserDto.getUsername());
+        if (ObjectUtil.isEmpty(user)) {
+            return Result.error(Result.CODE_ERROR_404, "用户不存在");
+        }
 
         // 2 比较密码
         if (!PasswordEncoderUtil.matches(loginUserDto.getPassword(), user.getPassword())) {
@@ -139,6 +142,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
                 .eq(User::getEmail, loginUserDto.getEmail());
         User result = getOne(queryWrapper);
+        if (ObjectUtil.isEmpty(result)) {
+            return Result.error(Result.CODE_ERROR_404, "邮箱未注册");
+        }
         // sa-token 登入
         return login(result, loginUserDto.getLoginType());
     }

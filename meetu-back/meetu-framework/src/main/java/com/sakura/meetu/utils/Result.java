@@ -21,6 +21,7 @@ public class Result implements Serializable {
     public static final String CODE_ERROR_400 = "400";
     public static final String CODE_ERROR_404 = "404";
     public static final String CODE_ERROR_403 = "403";
+    public static final String CODE_ERROR_402 = "402";
     public static final String CODE_ERROR_401 = "401";
 
     private static final long serialVersionUID = 42L;

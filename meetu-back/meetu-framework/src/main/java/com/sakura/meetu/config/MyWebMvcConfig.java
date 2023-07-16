@@ -25,7 +25,8 @@ public class MyWebMvcConfig extends WebMvcConfigurationSupport {
                         "/api/normal/login",
                         "/api/email/login",
                         "/api/register",
-                        "/api/email"
+                        "/api/email",
+                        "/api/file/upload"
                 )
                 // 排除Swagger 拦截
                 .excludePathPatterns("/swagger**/**", "/webjars/**", "/v3/**", "/doc.html", "");
