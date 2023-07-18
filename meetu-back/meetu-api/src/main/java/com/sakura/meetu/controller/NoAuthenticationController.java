@@ -27,7 +27,7 @@ public class NoAuthenticationController {
         this.userService = userService;
     }
 
-    
+
     @GetMapping("/api/testLogin")
     public String testLogin() {
         return "success";
@@ -56,8 +56,8 @@ public class NoAuthenticationController {
         return userService.register(userDto);
     }
 
-
     @GetMapping("/active")
-    public void active() {
+    public Result active() {
+        return Result.success(userService.list());
     }
 }

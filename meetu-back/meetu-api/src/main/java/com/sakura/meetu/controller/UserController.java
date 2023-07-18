@@ -6,10 +6,13 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sakura.meetu.dto.UserDto;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.Result;
+import com.sakura.meetu.validation.UserInfoUpdateGroup;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,7 +32,7 @@ import java.util.List;
  * @since 2023-05-21
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 public class UserController {
 
     private final IUserService userService;
@@ -38,25 +41,10 @@ public class UserController {
         this.userService = userService;
     }
 
-    @ApiOperation(value = "保存用户")
-    @PostMapping
-    public Result save(@RequestBody User user) {
-        userService.save(user);
-        return Result.success();
-    }
-
-    @ApiOperation(value = "更新用户")
-    @PutMapping
-    public Result update(@RequestBody User user) {
-        userService.updateById(user);
-        return Result.success();
-    }
-
-    @ApiOperation(value = "修改用户")
-    @DeleteMapping("/{id}")
-    public Result delete(@PathVariable Integer id) {
-        userService.removeById(id);
-        return Result.success();
+    @PutMapping("/modify")
+    public Result modifyUser(@RequestBody @Validated(UserInfoUpdateGroup.class) UserDto userDto) {
+        // 修改用户的个人信息 头像 name age gender intro
+        return userService.modifyUser(userDto);
     }
 
     @ApiOperation(value = "批量删除用户")

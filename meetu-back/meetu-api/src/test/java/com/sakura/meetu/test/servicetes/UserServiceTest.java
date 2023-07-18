@@ -2,6 +2,7 @@ package com.sakura.meetu.test.servicetes;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sakura.meetu.enums.GenderEnum;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.RedisUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +31,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("测试用户注册")
     void testUserRegister() throws JsonProcessingException {
-
+        System.out.println(GenderEnum.getValue("男").get());
     }
 }

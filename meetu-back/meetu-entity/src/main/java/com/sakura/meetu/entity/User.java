@@ -77,6 +77,13 @@ public class User implements Serializable {
     @Alias("用户头像")
     private String avatar;
 
+    @Alias("年龄")
+    private Byte age;
+    @Alias("性别")
+    private String gender;
+    @Alias("简介")
+    private String intro;
+
     /**
      * 逻辑删除
      */

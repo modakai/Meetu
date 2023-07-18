@@ -23,4 +23,6 @@ public interface IUserService extends IService<User> {
     Result normalLogin(UserDto loginUserDto);
 
     Result emailLogin(UserDto loginUserDto);
+
+    Result modifyUser(UserDto userDto);
 }

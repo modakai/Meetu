@@ -5,6 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sakura.meetu.constants.RabbitMqConstants;
 import com.sakura.meetu.constants.RedisKeyConstants;
@@ -12,6 +13,7 @@ import com.sakura.meetu.constants.SaTokenConstant;
 import com.sakura.meetu.dto.UserDto;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.enums.EmailCodeEnum;
+import com.sakura.meetu.enums.GenderEnum;
 import com.sakura.meetu.exception.ServiceException;
 import com.sakura.meetu.mapper.UserMapper;
 import com.sakura.meetu.service.IUserService;
@@ -24,6 +26,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.sakura.meetu.constants.Constant.EMAIL_TYPE_REGISTER;
@@ -59,14 +62,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         // 获取 IoC 代理对象
         UserServiceImpl currentProxy = (UserServiceImpl) AopContext.currentProxy();
+        userDto.setAvatar("https://sakura-meetu.oss-cn-shenzhen.aliyuncs.com/default/default.png");
         // 防止事务失效
         User user = currentProxy.saveUser(userDto);
         if (ObjectUtil.isEmpty(user)) {
             return Result.error(Result.CODE_ERROR_400, "账户或者邮箱已被注册! 如果已忘记密码可以进行找回密码哟!");
         }
-        UserVo userVo = BeanUtil.copyBean(user, UserVo.class);
 
-        return Result.success(userVo);
+        return Result.success();
     }
 
     @Override
@@ -95,7 +98,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         } else {
             if (optionalUser.isEmpty()) {
                 log.info("{} 邮箱未注册 用户试图获取验证码", email);
-                return Result.error(Result.CODE_ERROR_400, "该邮箱未注册");
+                return Result.error(Result.CODE_ERROR_404, "该邮箱未注册");
             }
         }
         // RabbitMQ来处理
@@ -149,6 +152,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return login(result, loginUserDto.getLoginType());
     }
 
+    @Override
+    public Result modifyUser(UserDto userDto) {
+        // 1 校验性别 参数 age 以及校验过了
+        GenderEnum.getValue(userDto.getGender())
+                .orElseThrow(() -> new ServiceException("性别类型传递错误"));
+        // 2 只修改 name, avatar, age, gender, intro 这几个字段
+        //  更新前通过 token 获取到 用户的UID
+        String uid = StpUtil.getLoginIdAsString();
+        log.info("用户修改个人信息, 用户id: {}", uid);
+
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<User>()
+                .set(StrUtil.isNotBlank(userDto.getName()), "name", userDto.getName())
+                .set(StrUtil.isNotBlank(userDto.getAvatar()), "avatar", userDto.getAvatar())
+                .set(StrUtil.isNotBlank(userDto.getGender()), "gender", userDto.getGender())
+                .set(StrUtil.isNotBlank(userDto.getIntro()), "intro", userDto.getIntro())
+                .set("update_time", LocalDateTime.now())
+                .set("age", userDto.getAge())
+                .eq("uid", uid);
+        try {
+            update(updateWrapper);
+        } catch (Exception e) {
+            log.error("数据库发送异常: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        return Result.success();
+    }
+
 
     public Result login(User user, String loginType) {
         switch (loginType) {
@@ -164,13 +195,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         StpUtil.getSession().set(SaTokenConstant.CACHE_LOGIN_USER_KEY, user);
         String token = StpUtil.getTokenInfo().getTokenValue();
+
         UserVo result = UserVo.builder()
                 .uid(user.getUid())
                 .username(user.getUsername())
+                .name(user.getName())
+                .avatar(user.getAvatar())
                 .email(user.getEmail())
+                .age(user.getAge())
+                .gender(user.getGender())
+                .intro(user.getIntro())
                 .createTime(user.getCreateTime())
                 .Authorization(token)
                 .build();
+
         log.info("当前登入用户: {} 在 {} 端登入, 登入时间: {} ",
                 result.getUsername(), loginType, result.getCreateTime());
         return Result.success(result);
@@ -197,6 +235,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             userDto.setName(ChineseUsernameGenerator.generateChineseUsername());
         }
         user.setPassword(PasswordEncoderUtil.encodePassword(user.getPassword()));
+        user.setAge((byte) 0);
+        user.setGender(GenderEnum.UNKNOWN.toString());
 
         // 设置唯一表示
         user.setUid(IdUtil.fastSimpleUUID());
@@ -204,6 +244,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (!saved) {
             throw new ServiceException(Result.CODE_SYS_ERROR, "服务异常");
         }
+
         return user;
     }
 

@@ -1,9 +1,6 @@
 package com.sakura.meetu.dto;
 
-import com.sakura.meetu.validation.EmailLoginGroup;
-import com.sakura.meetu.validation.LoginGroup;
-import com.sakura.meetu.validation.SaveGroup;
-import com.sakura.meetu.validation.UpdateGroup;
+import com.sakura.meetu.validation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -11,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
@@ -55,6 +54,17 @@ public class UserDto implements Serializable {
 
     @ApiModelProperty("用户昵称")
     private String name;
+
+    // 用户头像
+    private String avatar;
+
+    @Min(value = 0, message = "不能小于 0 岁", groups = {UserInfoUpdateGroup.class})
+    @Max(value = 120, message = "超出最大年龄范围", groups = {UserInfoUpdateGroup.class})
+    private Byte age;
+
+    private String gender;
+
+    private String intro;
 
     @ApiModelProperty("登入类型")
     @NotBlank(message = "类型不能为空", groups = {LoginGroup.class, EmailLoginGroup.class})

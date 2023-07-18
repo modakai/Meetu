@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
                 .map(fieldError -> {
                     Object value = fieldError.getRejectedValue();
                     log.error("参数错误值: {}", value);
-                    return fieldError.getField() + ":" + fieldError.getDefaultMessage();
+                    return fieldError.getDefaultMessage();
                 })
                 .collect(Collectors.joining("\r\n"));
 

@@ -4,7 +4,7 @@
     <cache flushInterval="60000"/>
 
     <sql id="all">
-        id, uid, username, `password`, `name`, email, create_time, update_time, deleted
+        id, uid, username, `password`, `name`, email, age, gender, intro, create_time, update_time, deleted
     </sql>
 
     <select id="selectOneByUsernameEmail" resultType="com.sakura.meetu.entity.User">
