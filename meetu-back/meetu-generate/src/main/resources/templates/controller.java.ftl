@@ -13,7 +13,7 @@ import javax.annotation.Resource;
 import java.io.InputStream;
 import java.util.List;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import ${package.Parent}.common.Result;
+import ${package.Parent}.utils.Result;
 import org.springframework.web.multipart.MultipartFile;
 import ${package.Service}.${table.serviceName};
 import ${package.Entity}.${entity};

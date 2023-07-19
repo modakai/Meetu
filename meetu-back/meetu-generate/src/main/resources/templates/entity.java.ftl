@@ -6,9 +6,6 @@ import ${pkg};
 import cn.hutool.core.annotation.Alias;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.partner.boot.common.LDTConfig;
 <#if entityLombokModel>
 import lombok.Getter;
 import lombok.Setter;

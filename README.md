@@ -8,7 +8,7 @@
 
 **meetu-back 为后台接口**
 
-**meetu-front-vue2 为后台管理页面**
+**meetu-manage为后台管理页面**
 
 ## 技术
 

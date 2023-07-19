@@ -8,6 +8,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
+import java.util.List;
+
 /**
  * 配置 Swagger 访问路径 以及 将来的Sa-token 的拦截路径
  *
@@ -17,17 +19,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @Configuration
 public class MyWebMvcConfig extends WebMvcConfigurationSupport {
 
+    private static final List<String> EXCLUDE_PATH_COMMON = List.of(
+            "/api/normal/login",
+            "/api/email/login",
+            "/api/register",
+            "/api/email",
+            "/api/file/upload"
+    );
+
+    // 动态放行路径
+    private static final List<String> EXCLUDE_PATH_DYNAMIC = List.of(
+
+    );
+
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SaInterceptor(handler -> StpUtil.checkLogin()))
                 .addPathPatterns("/api/**")
-                .excludePathPatterns(
-                        "/api/normal/login",
-                        "/api/email/login",
-                        "/api/register",
-                        "/api/email",
-                        "/api/file/upload"
-                )
+                .excludePathPatterns(EXCLUDE_PATH_COMMON)
                 // 排除Swagger 拦截
                 .excludePathPatterns("/swagger**/**", "/webjars/**", "/v3/**", "/doc.html", "");
     }
