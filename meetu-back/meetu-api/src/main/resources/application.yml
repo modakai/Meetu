@@ -111,13 +111,6 @@ sa-token:
   is-read-cookie: off
   is-write-header: off
 # 阿里云 存储
-aliyun:
-  oss:
-    file:
-      endpoint: oss-cn-shenzhen.aliyuncs.com
-      keyid: LTAI5tBVPZhygaHirgeJZYGc
-      keysecret: jQZBApROc82Cj6yapnbFKF2fiGitHi
-      bucketname: sakura-meetu
 logging:
   level:
     com.sakura.meetu: debug
