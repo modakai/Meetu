@@ -27,6 +27,9 @@ import java.io.Serializable;
 public class UserDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private Integer id;
+    private String uid;
+
     @ApiModelProperty("用户名")
     @NotBlank(message = "用户名不能为空", groups = {LoginGroup.class, SaveGroup.class})
     @Length(min = 3, max = 16, message = "用户名请输入在3~16个字符之间", groups = {LoginGroup.class, SaveGroup.class})
@@ -67,7 +70,7 @@ public class UserDto implements Serializable {
     private String intro;
 
     @ApiModelProperty("登入类型")
-    @NotBlank(message = "类型不能为空", groups = {LoginGroup.class, EmailLoginGroup.class})
+    @NotBlank(message = "登入端类型不能为空", groups = {LoginGroup.class, EmailLoginGroup.class})
     private String loginType;
 
     @NotBlank(

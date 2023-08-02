@@ -24,6 +24,8 @@ import java.time.LocalDateTime;
 public class UserVo implements Serializable {
     private static final long serialVersionUID = 123L;
 
+    private Integer id;
+
     /**
      * 用户 UID
      */

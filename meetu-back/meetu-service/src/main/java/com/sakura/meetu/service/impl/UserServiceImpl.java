@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.constants.RabbitMqConstants;
 import com.sakura.meetu.constants.RedisKeyConstants;
 import com.sakura.meetu.constants.SaTokenConstant;
@@ -27,7 +28,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.sakura.meetu.constants.Constant.EMAIL_TYPE_REGISTER;
 
@@ -62,7 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         // 获取 IoC 代理对象
         UserServiceImpl currentProxy = (UserServiceImpl) AopContext.currentProxy();
-        userDto.setAvatar("https://sakura-meetu.oss-cn-shenzhen.aliyuncs.com/default/default.png");
+        userDto.setAvatar(Constant.USER_AVATAR_DEFAULT);
         // 防止事务失效
         User user = currentProxy.saveUser(userDto);
         if (ObjectUtil.isEmpty(user)) {
@@ -180,6 +185,106 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.success();
     }
 
+    @Override
+    public Result logout(String uid, String thenLoginType) {
+        if (StrUtil.isBlank(uid) || StrUtil.isBlank(thenLoginType)) {
+            return Result.error(Result.CODE_ERROR_400, "参数错误");
+        }
+        // 校验登入类型
+        if (
+                !SaTokenConstant.LOGIN_USER_TYPE_PC.equals(thenLoginType)
+                        &&
+                        !SaTokenConstant.LOGIN_USER_TYPE_APP.equals(thenLoginType)
+        ) {
+            return Result.error(Result.CODE_ERROR_400, "参数错误");
+        }
+
+        // 退出登入
+        StpUtil.logout(uid, thenLoginType);
+
+        return Result.success();
+    }
+
+    @Override
+    @Transactional(rollbackFor = {RuntimeException.class, ServiceException.class})
+    public Result insertUserBatch(List<User> list) {
+        // 校验参数 例 用户 username email 是否存在
+        Set<User> result = verifyBatchData(list);
+
+        // 校验通过 则直接批量导入
+        try {
+            saveBatch(result);
+        } catch (Exception e) {
+            log.error("导入用户数据出现异常: {}", e.getMessage(), e);
+            throw new ServiceException(Result.CODE_SYS_ERROR, "导入异常");
+        }
+        return Result.success();
+    }
+
+    public Set<User> verifyBatchData(List<User> list) {
+
+        if (list.isEmpty()) {
+            throw new ServiceException(Result.CODE_ERROR_400, "文件数据不能为空");
+        }
+
+        List<User> userList = list();
+        Set<User> differentUsers = new HashSet<>();
+
+        Set<String> usernameSet = userList.stream().map(User::getUsername).collect(Collectors.toSet());
+        Set<String> emailSet = userList.stream().map(User::getEmail).collect(Collectors.toSet());
+
+        for (User user : list) {
+            if (usernameSet.contains(user.getUsername()) || emailSet.contains(user.getEmail())) {
+                throw new ServiceException(Result.CODE_ERROR_400, "不能导入账户或者邮箱一致的用户信息! 请检查导入的数据");
+            }
+            // 不存在重复的数据 初始化数据
+            String avatar = user.getAvatar();
+            if (StrUtil.isBlank(avatar)) {
+                avatar = Constant.USER_AVATAR_DEFAULT;
+            }
+            user.setAvatar(avatar);
+            if (StrUtil.isBlank(user.getName())) {
+                // 为空则随机生成
+                user.setName(ChineseUsernameGenerator.generateChineseUsername());
+            }
+
+            String password = user.getPassword();
+            if (StrUtil.isBlank(password)) {
+                password = Constant.USER_DEFAULT_PASSWORD;
+            }
+            user.setPassword(PasswordEncoderUtil.encodePassword(password));
+            String gender = user.getGender();
+            if (StrUtil.isBlank(gender)) {
+                gender = GenderEnum.UNKNOWN.toString();
+            }
+            user.setGender(gender);
+
+            // 设置唯一表示
+            user.setUid(IdUtil.fastSimpleUUID());
+            differentUsers.add(user);
+        }
+
+        return differentUsers;
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public Result removeBatch(List<Integer> ids) {
+        if (ids.isEmpty()) {
+            return Result.error(Result.CODE_ERROR_400, "请传递正确的数据");
+        }
+
+        try {
+            removeByIds(ids);
+        } catch (Exception e) {
+            log.error("数据库发生异常: ", e);
+            throw new RuntimeException(e);
+        }
+
+        return Result.success();
+    }
+
 
     public Result login(User user, String loginType) {
         switch (loginType) {
@@ -194,7 +299,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         StpUtil.getSession().set(SaTokenConstant.CACHE_LOGIN_USER_KEY, user);
-        String token = StpUtil.getTokenInfo().getTokenValue();
+        String token = StpUtil.getTokenValue();
 
         UserVo result = UserVo.builder()
                 .uid(user.getUid())

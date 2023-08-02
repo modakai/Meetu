@@ -29,7 +29,7 @@ public class ApiCurrentLimitingFilter implements Filter {
     // 记录次数
     private static final AtomicInteger bear = new AtomicInteger(0);
     // 并发访问阈值
-    private static final byte door = 5;
+    private static final int door = 200;
     // 开始时间
     private static volatile long starterTime = System.currentTimeMillis();
 
@@ -58,6 +58,7 @@ public class ApiCurrentLimitingFilter implements Filter {
         } else {
             starterTime = System.currentTimeMillis();
             bear.set(1);
+            log.info("重置限制接口次数: {}", bear.get());
         }
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;

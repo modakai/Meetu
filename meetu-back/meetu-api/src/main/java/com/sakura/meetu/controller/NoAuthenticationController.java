@@ -33,6 +33,11 @@ public class NoAuthenticationController {
         return "success";
     }
 
+    @PostMapping("/api/logout/{uid}")
+    public Result logout(@PathVariable String uid, @RequestParam String thenLoginType) {
+        return userService.logout(uid, thenLoginType);
+    }
+
     @PostMapping("/api/normal/login")
     public Result normalLogin(@RequestBody @Validated(LoginGroup.class) UserDto loginUserDto) {
         return userService.normalLogin(loginUserDto);

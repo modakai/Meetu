@@ -25,4 +25,13 @@ public interface Constant {
      * 验证码随机字符串
      */
     String VERIFICATION_CODE = "abcdefghijklnmopqrstuvwxyzABCDEFGHIJKLNMOPQRSTUVWXYZ0123456789";
+
+    /**
+     * 用户默认头像
+     */
+    String USER_AVATAR_DEFAULT = "https://sakura-meetu.oss-cn-shenzhen.aliyuncs.com/default/default.png";
+    /**
+     * 用户默认密码
+     */
+    String USER_DEFAULT_PASSWORD = "123abc";
 }

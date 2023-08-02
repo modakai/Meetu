@@ -24,7 +24,8 @@ public class MyWebMvcConfig extends WebMvcConfigurationSupport {
             "/api/email/login",
             "/api/register",
             "/api/email",
-            "/api/file/upload"
+            "/api/file/upload",
+            "/**/export"
     );
 
     // 动态放行路径

@@ -2,8 +2,13 @@ package com.sakura.meetu.entity;
 
 import cn.hutool.core.annotation.Alias;
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sakura.meetu.config.LDTConfig;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,6 +27,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 @TableName("sys_user")
 @ApiModel(value = "User对象", description = "")
 public class User implements Serializable {
@@ -46,6 +52,7 @@ public class User implements Serializable {
     @ApiModelProperty("密码")
     @Alias("密码")
     @TableField("`password`")
+    @JsonIgnore
     private String password;
     /**
      * 昵称
@@ -90,13 +97,16 @@ public class User implements Serializable {
     @ApiModelProperty("逻辑删除")
     @Alias("逻辑删除")
     @TableLogic(value = "0", delval = "id")
-    private Byte deleted;
+    @JsonIgnore
+    private Integer deleted;
     /**
      * 创建时间
      */
     @ApiModelProperty("创建时间")
     @Alias("创建时间")
     @TableField(fill = FieldFill.INSERT)
+    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
+    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
     private LocalDateTime createTime;
 
     /**
@@ -105,6 +115,11 @@ public class User implements Serializable {
     @ApiModelProperty("更新时间")
     @Alias("更新时间")
     @TableField(fill = FieldFill.UPDATE)
+    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
+    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
+    @JsonIgnore
     private LocalDateTime updateTime;
 
+    public User() {
+    }
 }

@@ -1,9 +1,8 @@
 package com.sakura.meetu.utils;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import cn.hutool.crypto.digest.BCrypt;
 
 public class PasswordEncoderUtil {
-    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
      * 密码加密
@@ -12,7 +11,7 @@ public class PasswordEncoderUtil {
      * @return 密码加密的结果
      */
     public static String encodePassword(String password) {
-        return passwordEncoder.encode(password);
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     /**
@@ -23,6 +22,6 @@ public class PasswordEncoderUtil {
      * @return 密码正确返回 true 错误为 false
      */
     public static boolean matches(String rawPassword, String encodedPassword) {
-        return passwordEncoder.matches(rawPassword, encodedPassword);
+        return BCrypt.checkpw(rawPassword, encodedPassword);
     }
 }

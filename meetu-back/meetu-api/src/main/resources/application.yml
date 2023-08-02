@@ -14,8 +14,6 @@ spring:
       maximum-pool-size: 10
       # 一个连接idle状态的最大时长（毫秒），超时则被释放（retired）
       idle-timeout: 30000
-      # 一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired）
-      max-lifetime: 1800000
   application:
     name: MeetU
   main:
@@ -54,7 +52,7 @@ spring:
     port: 6379
     database: 0
     host: 127.0.0.1
-    password: 123abc
+    #    password: 123abc
     timeout: 10s
     # 连接超时
     lettuce:

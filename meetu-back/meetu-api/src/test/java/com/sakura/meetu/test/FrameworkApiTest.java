@@ -1,6 +1,5 @@
 package com.sakura.meetu.test;
 
-import com.sakura.meetu.enums.EmailCodeEnum;
 import com.sakura.meetu.utils.PasswordEncoderUtil;
 import com.sakura.meetu.utils.RedisUtils;
 import org.junit.jupiter.api.Test;
@@ -27,8 +26,11 @@ public class FrameworkApiTest {
 
     @Test
     void testEnums() {
-        EmailCodeEnum register = EmailCodeEnum.valueOf("qaa");
-        System.out.println(register);
+//        EmailCodeEnum register = EmailCodeEnum.valueOf("qaa");
+//        System.out.println(register);
+        String url = "jdbc:mysql://localhost:3306/meetu?serviceTimezone=GMT+8&useSSL=false&characterEncoding=UTF-8";
+        String database = url.substring(url.lastIndexOf("/") + 1, url.indexOf("?"));
+        System.out.println(database);
     }
 
     @Test

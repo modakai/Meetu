@@ -8,19 +8,25 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sakura.meetu.dto.UserDto;
 import com.sakura.meetu.entity.User;
+import com.sakura.meetu.exception.ServiceException;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.validation.UserInfoUpdateGroup;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -34,6 +40,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     private final IUserService userService;
 
@@ -50,8 +58,7 @@ public class UserController {
     @ApiOperation(value = "批量删除用户")
     @PostMapping("/del/batch")
     public Result deleteBatch(@RequestBody List<Integer> ids) {
-        userService.removeByIds(ids);
-        return Result.success();
+        return userService.removeBatch(ids);
     }
 
     @ApiOperation(value = "查询全部用户")
@@ -68,11 +75,11 @@ public class UserController {
 
     @ApiOperation(value = "分页查询")
     @GetMapping("/page")
-    public Result findPage(@RequestParam(defaultValue = "") String name,
+    public Result findPage(@RequestParam(defaultValue = "") String username,
                            @RequestParam Integer pageNum,
                            @RequestParam Integer pageSize) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<User>().orderByDesc("id");
-        queryWrapper.like(!"".equals(name), "name", name);
+        queryWrapper.likeRight(!"".equals(username), "username", username);
         return Result.success(userService.page(new Page<>(pageNum, pageSize), queryWrapper));
     }
 
@@ -81,24 +88,48 @@ public class UserController {
      */
     @ApiOperation(value = "导出用户数据")
     @GetMapping("/export")
-    public void export(HttpServletResponse response) throws Exception {
-        // 从数据库查询出所有的数据
-        List<User> list = userService.list();
-        // 在内存操作，写出到浏览器
-        ExcelWriter writer = ExcelUtil.getWriter(true);
+    @CrossOrigin
+    public void export(HttpServletResponse response) {
+        ExcelWriter writer = null;
+        ServletOutputStream out = null;
+        try {
+            // 从数据库查询出所有的数据
+            List<User> list = userService.list();
+            // 在内存操作，写出到浏览器
+            writer = ExcelUtil.getWriter(true);
 
-        // 一次性写出list内的对象到excel，使用默认样式，强制输出标题
-        writer.write(list, true);
+            // 一次性写出list内的对象到excel，使用默认样式，强制输出标题
+            writer.write(list, true);
 
-        // 设置浏览器响应的格式
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-        String fileName = URLEncoder.encode("User信息表", StandardCharsets.UTF_8);
-        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
+            // 设置浏览器响应的格式
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String fileName = URLEncoder.encode("User信息表-" + formatter.format(now), StandardCharsets.UTF_8);
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
 
-        ServletOutputStream out = response.getOutputStream();
-        writer.flush(out, true);
-        out.close();
-        writer.close();
+            out = response.getOutputStream();
+            writer.flush(out, true);
+        } catch (Exception e) {
+            log.error("导出用户接口出现异常 ", e);
+            throw new ServiceException(Result.CODE_SYS_ERROR, "导出失败");
+        } finally {
+            // 关闭资源
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
     }
 
@@ -116,8 +147,7 @@ public class UserController {
         // 通过 javabean的方式读取Excel内的对象，但是要求表头必须是英文，跟javabean的属性要对应起来
         List<User> list = reader.readAll(User.class);
 
-        userService.saveBatch(list);
-        return Result.success();
+        return userService.insertUserBatch(list);
     }
 
 }

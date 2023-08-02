@@ -14,6 +14,9 @@ import java.time.format.DateTimeFormatter;
 public class LDTConfig {
 
     public static class CmzLdtSerializer extends JsonSerializer<LocalDateTime> {
+        public CmzLdtSerializer() {
+        }
+
         @Override
         public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -22,7 +25,10 @@ public class LDTConfig {
         }
     }
 
-    public class CmzLdtDeSerializer extends JsonDeserializer<LocalDateTime> {
+    public static class CmzLdtDeSerializer extends JsonDeserializer<LocalDateTime> {
+        public CmzLdtDeSerializer() {
+        }
+
         @Override
         public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             String dateString = p.getValueAsString();

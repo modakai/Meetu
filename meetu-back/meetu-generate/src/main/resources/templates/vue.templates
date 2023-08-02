@@ -5,8 +5,8 @@ import {
   Plus, User,
   Bottom, Top, Delete,
 } from '@element-plus/icons-vue'
-import {reactive, ref} from "vue";
-import {delBatch, userPage} from "@/api/userApi";
+import { nextTick, reactive, ref} from "vue";
+import {delBatch, {lowerEntity}Page} from "@/api/{lowerEntity}Api";
 import {useUserStore} from "@/stores/user";
 import {ElMessage} from "element-plus";
 
@@ -15,12 +15,7 @@ const pageNum = ref(1)
 const pageSize = ref(5)
 const total = ref(0)
 const data = reactive({
-  table: [
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'}
-  ]
+  table: []
 })
 
 // 对话框
@@ -30,16 +25,16 @@ const dialogData = reactive({
   title: '',
   formData: {}
 })
+// TODO 修改自己修改的地方
 const dialogRules = reactive({
   username: [
     { required: true, message: '账号不能为空', trigger: 'blur' },
   ],
-
 })
 
 // 加载数据
 const load = () => {
-  userPage({
+  {lowerEntity}Page({
     name: name.value,
     pageNum: pageNum.value,
     pageSize: pageSize.value
@@ -63,9 +58,10 @@ const sizeChange = (newSize) => {
   load()
 }
 // 搜索用户
-const searchUser = () => {
+const search{lowerEntity} = () => {
   load()
 }
+
 // 重置搜索框
 const resetSearch = () => {
   name.value = ''
@@ -76,19 +72,21 @@ const resetSearch = () => {
 
 // 新增对话框
 const dialogAdd = () => {
-  dialogData.title = '新增用户'
+  dialogData.title = '新增{moduleName}'
   resetDialog({})
 }
 // 编辑用户信息 随便查看详情
 const dialogEdit = (row) => {
-  dialogData.title = '编辑用户'
+  dialogData.title = '编辑{moduleName}'
   resetDialog(row)
 }
 // 重置 对话框
 const resetDialog = (data) => {
-  dialogData.formData = data
   dialogData.dialogFormVisible = true
-  dialogFormRef.value.resetFields()
+  nextTick(() => {
+    dialogData.formData = JSON.parse(JSON.stringify(data))
+    dialogFormRef.value.resetFields()
+  })
 }
 // 关闭对话框
 const closeDialog = () => {
@@ -121,7 +119,7 @@ const confirmDelBatch = () => {
   })
 }
 
-const importDataUrl = ref('/api/user/import')
+const importDataUrl = ref('/api/{lowerEntity}/import')
 const importHeaders = reactive({
   Authorization: useUserStore().getAuthorization
 })
@@ -142,7 +140,7 @@ const importError = (response) => {
 const importSuccess = (response) => {
   let code = response.code
   if (code === '200') {
-    ElMessage.success("导入成功! 未设置密码的用户默认密码是 123abc")
+    ElMessage.success("导入{moduleName}成功!")
     load()
   } else {
     ElMessage.error(response.msg)
@@ -152,8 +150,38 @@ const importSuccess = (response) => {
 // 导出数据
 const exportAll = () => {
   // TODO 这里肯定是有问题的
- window.open("http://localhost:8848/api/user/export")
+ window.open("http://localhost:8848/api/{lowerEntity}/export")
 }
+
+// 删除
+const del = (data) => {
+  // 写接口
+  delOne(data.id).then(res => {
+    if (res.code === '200') {
+      ElMessage.success('删除成功')
+      load()
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
+const save = () => {
+  dialogFormRef.value.validate(valid => {   // valid就是校验的结果
+    if (valid) {
+      saveOrUpdate('/{lowerEntity}', dialogData.formData).then(res => {
+        if (res.code === '200') {
+          ElMessage.success('保存成功')
+          dialogData.dialogFormVisible = false
+          load()  // 刷新表格数据
+        } else {
+          ElMessage.error(res.msg)
+        }
+      })
+    }
+  })
+}
+
 
 </script>
 
@@ -161,10 +189,10 @@ const exportAll = () => {
   <div class="home">
 
     <div class="main-search">
-      <el-input v-model="name" placeholder="请输入用户账户"/>
+      <el-input v-model="name" placeholder="请输入{moduleName}关键字"/>
       <el-button
           type="primary"
-          @click="searchUser"
+          @click="search{lowerEntity}"
       >
         <el-icon style="vertical-align: middle">
           <Search/>
@@ -256,22 +284,20 @@ const exportAll = () => {
           stripe border
           style="width: 100%;"
       >
-        <el-table-column type="selection" width="55"/>
-        <el-table-column prop="username" label="账户" />
-        <el-table-column prop="name" label="昵称" />
-        <el-table-column prop="gender" label="性别" />
-        <el-table-column prop="email" label="邮箱" />
-        <el-table-column prop="createTime" label="注册时间" />
-        <el-table-column label="操作" width="180">
-          <template #default="scope">
-            <el-button type="primary" @click="dialogEdit(scope.row)">编辑</el-button>
-            <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
-              <template #reference>
-                <el-button type="danger">删除</el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
+       <el-table-column type="selection" width="55"/>
+
+{tableBody}
+
+       <el-table-column label="操作" width="180">
+         <template #default="scope">
+           <el-button type="primary" @click="dialogEdit(scope.row)">编辑</el-button>
+           <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
+             <template #reference>
+               <el-button type="danger">删除</el-button>
+             </template>
+           </el-popconfirm>
+         </template>
+       </el-table-column>
       </el-table>
     </div>
 
@@ -298,21 +324,15 @@ const exportAll = () => {
           size="large"
           status-icon
       >
-        <el-form-item prop="username">
-          <el-input
-              v-model="dialogData.formData.username"
-              placeholder="请填入账号"
-              clearable
-              :prefix-icon="User"
-              :disabled="dialogData.title !== undefined && dialogData.title === '编辑用户'"
-          />
-        </el-form-item>
+
+{dialog-form}
+
       </el-form>
 
       <template #footer>
       <span class="dialog-footer">
         <el-button @click="closeDialog">关闭</el-button>
-        <el-button type="primary" @click="dialogData.dialogFormVisible = false">
+        <el-button type="primary" @click="save">
           保存
         </el-button>
       </span>
