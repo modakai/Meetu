@@ -1,11 +1,11 @@
 package com.sakura.meetu.service.impl;
 
+import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.constants.RabbitMqConstants;
@@ -17,9 +17,11 @@ import com.sakura.meetu.enums.EmailCodeEnum;
 import com.sakura.meetu.enums.GenderEnum;
 import com.sakura.meetu.exception.ServiceException;
 import com.sakura.meetu.mapper.UserMapper;
+import com.sakura.meetu.service.IPermissionService;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.service.MqMessageService;
 import com.sakura.meetu.utils.*;
+import com.sakura.meetu.vo.PermissionVo;
 import com.sakura.meetu.vo.UserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +29,6 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -52,14 +53,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     private final UserMapper userMapper;
     private final MqMessageService messageService;
+    private final IPermissionService permissionService;
     private final RedisUtils redisUtils;
 
-    public UserServiceImpl(UserMapper userMapper, MqMessageService messageService, RedisUtils redisUtils) {
+    public UserServiceImpl(UserMapper userMapper, MqMessageService messageService, IPermissionService permissionService, RedisUtils redisUtils) {
         this.userMapper = userMapper;
         this.messageService = messageService;
+        this.permissionService = permissionService;
         this.redisUtils = redisUtils;
     }
-
 
     @Override
     public Result register(UserDto userDto) {
@@ -162,21 +164,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 1 校验性别 参数 age 以及校验过了
         GenderEnum.getValue(userDto.getGender())
                 .orElseThrow(() -> new ServiceException("性别类型传递错误"));
-        // 2 只修改 name, avatar, age, gender, intro 这几个字段
-        //  更新前通过 token 获取到 用户的UID
-        String uid = StpUtil.getLoginIdAsString();
-        log.info("用户修改个人信息, 用户id: {}", uid);
 
-        UpdateWrapper<User> updateWrapper = new UpdateWrapper<User>()
-                .set(StrUtil.isNotBlank(userDto.getName()), "name", userDto.getName())
-                .set(StrUtil.isNotBlank(userDto.getAvatar()), "avatar", userDto.getAvatar())
-                .set(StrUtil.isNotBlank(userDto.getGender()), "gender", userDto.getGender())
-                .set(StrUtil.isNotBlank(userDto.getIntro()), "intro", userDto.getIntro())
-                .set("update_time", LocalDateTime.now())
-                .set("age", userDto.getAge())
-                .eq("uid", uid);
+        User user = BeanUtil.copyBean(userDto, User.class);
+
+//        UpdateWrapper<User> updateWrapper = new UpdateWrapper<User>()
+//                .set(StrUtil.isNotBlank(userDto.getName()), "name", userDto.getName())
+//                .set(StrUtil.isNotBlank(userDto.getAvatar()), "avatar", userDto.getAvatar())
+//                .set(StrUtil.isNotBlank(userDto.getGender()), "gender", userDto.getGender())
+//                .set(StrUtil.isNotBlank(userDto.getIntro()), "intro", userDto.getIntro())
+//                .set("update_time", LocalDateTime.now())
+//                .set("age", userDto.getAge())
+//                .eq("uid", uid);
+
         try {
-            update(updateWrapper);
+            updateById(user);
         } catch (Exception e) {
             log.error("数据库发送异常: {}", e.getMessage());
             throw new RuntimeException(e);
@@ -285,23 +286,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.success();
     }
 
-
-    public Result login(User user, String loginType) {
-        switch (loginType) {
-            case SaTokenConstant.LOGIN_USER_TYPE_PC:
-                StpUtil.login(user.getUid(), SaTokenConstant.LOGIN_USER_TYPE_PC);
-                break;
-            case SaTokenConstant.LOGIN_USER_TYPE_APP:
-                StpUtil.login(user.getUid(), SaTokenConstant.LOGIN_USER_TYPE_APP);
-                break;
-            default:
-                return Result.error(Result.CODE_ERROR_400, "登入类型有误");
+    @Override
+    public Result listOne(Integer id) {
+        User user = getById(id);
+        if (user == null) {
+            return Result.error(Result.CODE_ERROR_404, "不存在该用户信息");
         }
 
-        StpUtil.getSession().set(SaTokenConstant.CACHE_LOGIN_USER_KEY, user);
-        String token = StpUtil.getTokenValue();
-
         UserVo result = UserVo.builder()
+                .id(user.getId())
                 .uid(user.getUid())
                 .username(user.getUsername())
                 .name(user.getName())
@@ -311,7 +304,50 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 .gender(user.getGender())
                 .intro(user.getIntro())
                 .createTime(user.getCreateTime())
+                .build();
+        return Result.success(result);
+    }
+
+
+    public Result login(User user, String loginType) {
+        switch (loginType) {
+            case SaTokenConstant.LOGIN_USER_TYPE_PC:
+            case SaTokenConstant.LOGIN_USER_TYPE_APP:
+                break;
+            default:
+                return Result.error(Result.CODE_ERROR_400, "登入类型有误");
+        }
+
+
+        // 获取用户的权限菜单
+        String roleFlag = user.getRole();
+        // 获取用户的 水平menus
+        List<PermissionVo> permissionList = permissionService.getRolePermissionList(roleFlag);
+        // 获取 树 menus
+        List<PermissionVo> menus = permissionService.getTreeMenusPermission(permissionList);
+        // 获取 页面按钮的权限菜单
+        List<PermissionVo> pageMenus = permissionService.getPagePermissionMenus(permissionList);
+
+        StpUtil.login(user.getUid(), loginType);
+        SaSession session = StpUtil.getSession();
+        session.set(SaTokenConstant.CACHE_LOGIN_USER_KEY, user);
+        String token = StpUtil.getTokenValue();
+
+        UserVo result = UserVo.builder()
+                .id(user.getId())
+                .uid(user.getUid())
+                .username(user.getUsername())
+                .name(user.getName())
+                .role(user.getRole())
+                .avatar(user.getAvatar())
+                .email(user.getEmail())
+                .age(user.getAge())
+                .gender(user.getGender())
+                .intro(user.getIntro())
+                .createTime(user.getCreateTime())
                 .Authorization(token)
+                .menus(menus)
+                .pageMenus(pageMenus)
                 .build();
 
         log.info("当前登入用户: {} 在 {} 端登入, 登入时间: {} ",

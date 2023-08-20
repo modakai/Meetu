@@ -1,12 +1,6 @@
 <script setup>
-import {
-  Search,
-  RefreshRight,
-  Plus, User,
-  Bottom, Top, Delete,
-} from '@element-plus/icons-vue'
 import { nextTick, reactive, ref} from "vue";
-import {delBatch, {lowerEntity}Page} from "@/api/{lowerEntity}Api";
+import { delBatch, {lowerEntity}Page,  delOne, saveOrUpdate } from "@/api/{lowerEntity}Api";
 import {useUserStore} from "@/stores/user";
 import {ElMessage} from "element-plus";
 
@@ -93,10 +87,6 @@ const closeDialog = () => {
   dialogData.dialogFormVisible = false
 }
 
-// 删除
-const del = (data) => {
-  console.log(data)
-}
 // 批量删除
 const idArr = ref([])
 const handleSelectionChange = (selectionData) => {
@@ -316,13 +306,20 @@ const save = () => {
     </div>
 
     <!-- 对话框 -->
-    <el-dialog v-model="dialogData.dialogFormVisible" :title="dialogData.title" draggable :close-on-click-modal="false">
+    <el-dialog
+        v-model="dialogData.dialogFormVisible"
+        :title="dialogData.title" draggable
+        :close-on-click-modal="false"
+        width="50%"
+    >
       <el-form
           ref="dialogFormRef"
           :model="dialogData.formData"
           :rules="dialogRules"
           size="large"
           status-icon
+          label-width="80px"
+          style="padding: 0 20px"
       >
 
 {dialog-form}
@@ -330,12 +327,12 @@ const save = () => {
       </el-form>
 
       <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="closeDialog">关闭</el-button>
-        <el-button type="primary" @click="save">
-          保存
-        </el-button>
-      </span>
+          <span class="dialog-footer">
+            <el-button @click="closeDialog">关闭</el-button>
+            <el-button type="primary" @click="save">
+              保存
+            </el-button>
+          </span>
       </template>
     </el-dialog>
 

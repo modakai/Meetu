@@ -10,6 +10,8 @@ public interface RedisKeyConstants {
 
     String EMAIL_CODE = "email:code:";
 
+    String DICT_KEY = "dict";
+
     /**
      * 邮箱验证码 5 分钟过期时间
      */

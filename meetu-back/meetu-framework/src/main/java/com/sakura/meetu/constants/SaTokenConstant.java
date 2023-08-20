@@ -10,6 +10,9 @@ public interface SaTokenConstant {
 
     String CACHE_LOGIN_USER_KEY = "userInfo";
 
+    String PERMISSION_USER_KEY = "user:";
+    String ROLE_USER_KEY = "role:";
+
     String LOGIN_USER_TYPE_APP = "APP";
     String LOGIN_USER_TYPE_PC = "PC";
 }

@@ -1,6 +1,7 @@
 package com.sakura.meetu.controller;
 
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -55,10 +56,23 @@ public class UserController {
         return userService.modifyUser(userDto);
     }
 
+    @PutMapping
+    public Result updateUser(@RequestBody User user) {
+        userService.updateById(user);
+        return Result.success();
+    }
+
     @ApiOperation(value = "批量删除用户")
     @PostMapping("/del/batch")
     public Result deleteBatch(@RequestBody List<Integer> ids) {
         return userService.removeBatch(ids);
+    }
+
+    @DeleteMapping("/{id}")
+    @SaCheckPermission("user.delete")
+    public Result deleteOne(@PathVariable Integer id) {
+        userService.removeById(id);
+        return Result.success();
     }
 
     @ApiOperation(value = "查询全部用户")
@@ -70,7 +84,7 @@ public class UserController {
     @ApiOperation(value = "根据ID查询全部用户")
     @GetMapping("/{id}")
     public Result findOne(@PathVariable Integer id) {
-        return Result.success(userService.getById(id));
+        return userService.listOne(id);
     }
 
     @ApiOperation(value = "分页查询")

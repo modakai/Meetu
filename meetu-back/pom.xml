@@ -15,6 +15,7 @@
         <module>meetu-mapper</module>
         <module>meetu-service</module>
         <module>meetu-generate</module>
+        <module>meetu-im</module>
     </modules>
 
     <packaging>pom</packaging>

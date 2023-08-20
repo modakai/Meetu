@@ -10,6 +10,7 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 用户 Vo 类
@@ -54,6 +55,12 @@ public class UserVo implements Serializable {
 
     private String intro;
 
+    private String role;
+
     private String Authorization;
+
+    private List<PermissionVo> menus;
+
+    private List<PermissionVo> pageMenus;
 
 }

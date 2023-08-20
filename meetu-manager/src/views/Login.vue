@@ -4,7 +4,7 @@ import {User, Lock} from "@element-plus/icons-vue";
 import { ElMessage } from 'element-plus'
 import {loginAdmin} from "@/api/userApi";
 import {useUserStore} from "@/stores/user";
-import router from "@/router";
+import router, {setRoutes} from "@/router";
 
 const loginData = reactive({
   username: '',
@@ -67,7 +67,7 @@ const login = () => {
               style="width: 100%;
               font-size: 20px"
               @click.prevent="login"
-              @keyup.enter="login"
+              @keydown.enter="login"
           >
             Login
           </el-button>

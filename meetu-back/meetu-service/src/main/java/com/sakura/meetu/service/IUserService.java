@@ -36,4 +36,6 @@ public interface IUserService extends IService<User> {
     Set<User> verifyBatchData(List<User> list);
 
     Result removeBatch(List<Integer> ids);
+
+    Result listOne(Integer id);
 }

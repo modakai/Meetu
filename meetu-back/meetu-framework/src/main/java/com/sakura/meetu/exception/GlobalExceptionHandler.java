@@ -1,9 +1,12 @@
 package com.sakura.meetu.exception;
 
-import cn.dev33.satoken.exception.SaTokenException;
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotPermissionException;
+import cn.dev33.satoken.exception.NotRoleException;
 import cn.hutool.core.util.StrUtil;
 import com.sakura.meetu.utils.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,11 +26,46 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(SaTokenException.class)
-    public Result handleSaTokenException(SaTokenException e) {
-        log.info("权限异常: {}", e.getMessage(), e);
-        return Result.error(Result.CODE_ERROR_401, "权限不足");
+    @ExceptionHandler(DuplicateKeyException.class)
+    public Result handleDuplicateKeyException(DuplicateKeyException e) {
+        log.info("数据添加异常： {}", e.getMessage(), e);
+        return Result.error(Result.CODE_ERROR_400, "请勿重复添加相同的信息");
     }
+
+//    @ExceptionHandler(SaTokenException.class)
+//    public Result handleSaTokenException(SaTokenException e) {
+//        log.info("权限异常: {}", e.getMessage(), e);
+//        return Result.error(Result.CODE_ERROR_401, "权限不足");
+//    }
+
+    // 拦截：未登录异常
+    @ExceptionHandler(NotLoginException.class)
+    public Result handlerException(NotLoginException e) {
+
+        log.info("权限异常: {}", e.getMessage(), e);
+
+        // 返回给前端
+        return Result.error(Result.CODE_ERROR_401, "未登入，请先登入");
+    }
+
+    // 拦截：缺少权限异常
+    @ExceptionHandler(NotPermissionException.class)
+    public Result handlerException(NotPermissionException e) {
+
+//        return SaResult.error("缺少权限：" + e.getPermission());
+        log.info("权限异常: {}", e.getMessage(), e);
+        return Result.error(Result.CODE_ERROR_403, "权限不足");
+    }
+
+    // 拦截：缺少角色异常
+    @ExceptionHandler(NotRoleException.class)
+    public Result handlerException(NotRoleException e) {
+//        e.printStackTrace();
+//        return SaResult.error("缺少角色：" + e.getRole());
+        log.info("权限异常: {}", e.getMessage(), e);
+        return Result.error(Result.CODE_ERROR_403, "角色不足");
+    }
+
 
     @ExceptionHandler(value = ServiceException.class)
     public Result handleServiceException(ServiceException e) {

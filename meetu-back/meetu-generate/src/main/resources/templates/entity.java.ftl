@@ -6,6 +6,8 @@ import ${pkg};
 import cn.hutool.core.annotation.Alias;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 <#if entityLombokModel>
 import lombok.Getter;
 import lombok.Setter;
@@ -75,9 +77,9 @@ public class ${entity} {
     @TableField(value = "${field.annotationColumnName}", fill = FieldFill.${field.fill})
     <#else>
     @TableField(fill = FieldFill.${field.fill})
-<#--    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)-->
-<#--    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)-->
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss" timezone = "Asia/Shanghai")
+    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
+    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
+<#--    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")-->
     </#if>
     <#elseif field.convert>
     @TableField("${field.annotationColumnName}")

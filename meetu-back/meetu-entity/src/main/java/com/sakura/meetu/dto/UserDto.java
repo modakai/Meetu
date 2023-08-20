@@ -69,6 +69,8 @@ public class UserDto implements Serializable {
 
     private String intro;
 
+    private String role;
+
     @ApiModelProperty("登入类型")
     @NotBlank(message = "登入端类型不能为空", groups = {LoginGroup.class, EmailLoginGroup.class})
     private String loginType;

@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+import {setRoutes} from "@/router";
 
 export const useUserStore = defineStore('manager', {
     state: () => ({
@@ -7,10 +8,22 @@ export const useUserStore = defineStore('manager', {
     actions: {
         setManagerInfo(managerInfo) {
             this.managerInfo = managerInfo
+
+            // 设置路由
+            setRoutes(managerInfo.menus)
         },
         reset() {
             // 清除 浏览器的 token
             localStorage.removeItem('manager')
+        },
+        getMenus() {
+            return this.managerInfo.menus || []
+        },
+        getPageMenus() {
+            return this.managerInfo.pageMenus.length ? this.managerInfo.pageMenus.map(v => v.auth) : []
+        },
+        getManagerRole() {
+            return this.managerInfo.role || ''
         }
     },
     getters: {

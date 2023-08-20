@@ -28,3 +28,16 @@ export const delBatch = (data) => requests({
     method: 'POST',
     data: JSON.stringify(data)
 })
+
+// 批量删除用户
+export const delUser = (data) => requests({
+    url: '/user/' + data,
+    method: 'DELETE',
+})
+
+// 修改或者 添加
+export const saveOrUpdate = (url, data) => requests({
+    url: url,
+    method: data.id ? 'put' : 'post',
+    data: data
+})

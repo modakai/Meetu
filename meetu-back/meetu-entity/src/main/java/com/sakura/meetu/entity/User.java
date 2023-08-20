@@ -90,6 +90,8 @@ public class User implements Serializable {
     private String gender;
     @Alias("简介")
     private String intro;
+    @Alias("角色")
+    private String role;
 
     /**
      * 逻辑删除

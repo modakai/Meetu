@@ -1,12 +1,6 @@
 <script setup>
-import {
-  Search,
-  RefreshRight,
-  Plus, User,
-  Bottom, Top, Delete,
-} from '@element-plus/icons-vue'
-import {reactive, ref} from "vue";
-import {delBatch, userPage} from "@/api/userApi";
+import { nextTick, reactive, ref} from "vue";
+import { delBatch, dictPage,  delOne, saveOrUpdate } from "@/api/dictApi";
 import {useUserStore} from "@/stores/user";
 import {ElMessage} from "element-plus";
 
@@ -15,12 +9,7 @@ const pageNum = ref(1)
 const pageSize = ref(5)
 const total = ref(0)
 const data = reactive({
-  table: [
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'}
-  ]
+  table: []
 })
 
 // 对话框
@@ -30,16 +19,16 @@ const dialogData = reactive({
   title: '',
   formData: {}
 })
+// TODO 修改自己修改的地方
 const dialogRules = reactive({
   username: [
     { required: true, message: '账号不能为空', trigger: 'blur' },
   ],
-
 })
 
 // 加载数据
 const load = () => {
-  userPage({
+  dictPage({
     name: name.value,
     pageNum: pageNum.value,
     pageSize: pageSize.value
@@ -52,20 +41,11 @@ const load = () => {
 }
 load()
 
-// 切换页码
-const currentPageNumChange = (newPageNum) => {
-  pageNum.value = newPageNum
-  load()
-}
-// 切换显示条数
-const sizeChange = (newSize) => {
-  pageSize.value = newSize
-  load()
-}
 // 搜索用户
-const searchUser = () => {
+const searchdict = () => {
   load()
 }
+
 // 重置搜索框
 const resetSearch = () => {
   name.value = ''
@@ -76,29 +56,27 @@ const resetSearch = () => {
 
 // 新增对话框
 const dialogAdd = () => {
-  dialogData.title = '新增用户'
+  dialogData.title = '新增数据字典'
   resetDialog({})
 }
 // 编辑用户信息 随便查看详情
 const dialogEdit = (row) => {
-  dialogData.title = '编辑用户'
+  dialogData.title = '编辑数据字典'
   resetDialog(row)
 }
 // 重置 对话框
 const resetDialog = (data) => {
-  dialogData.formData = data
   dialogData.dialogFormVisible = true
-  dialogFormRef.value.resetFields()
+  nextTick(() => {
+    dialogData.formData = JSON.parse(JSON.stringify(data))
+    dialogFormRef.value.resetFields()
+  })
 }
 // 关闭对话框
 const closeDialog = () => {
   dialogData.dialogFormVisible = false
 }
 
-// 删除
-const del = (data) => {
-  console.log(data)
-}
 // 批量删除
 const idArr = ref([])
 const handleSelectionChange = (selectionData) => {
@@ -121,7 +99,7 @@ const confirmDelBatch = () => {
   })
 }
 
-const importDataUrl = ref('/api/user/import')
+const importDataUrl = ref('/api/dict/import')
 const importHeaders = reactive({
   Authorization: useUserStore().getAuthorization
 })
@@ -142,7 +120,7 @@ const importError = (response) => {
 const importSuccess = (response) => {
   let code = response.code
   if (code === '200') {
-    ElMessage.success("导入成功! 未设置密码的用户默认密码是 123abc")
+    ElMessage.success("导入数据字典成功!")
     load()
   } else {
     ElMessage.error(response.msg)
@@ -152,8 +130,38 @@ const importSuccess = (response) => {
 // 导出数据
 const exportAll = () => {
   // TODO 这里肯定是有问题的
- window.open("http://localhost:8848/api/user/export")
+ window.open("http://localhost:8848/api/dict/export")
 }
+
+// 删除
+const del = (data) => {
+  // 写接口
+  delOne(data.id).then(res => {
+    if (res.code === '200') {
+      ElMessage.success('删除成功')
+      load()
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
+const save = () => {
+  dialogFormRef.value.validate(valid => {   // valid就是校验的结果
+    if (valid) {
+      saveOrUpdate('/dict', dialogData.formData).then(res => {
+        if (res.code === '200') {
+          ElMessage.success('保存成功')
+          dialogData.dialogFormVisible = false
+          load()  // 刷新表格数据
+        } else {
+          ElMessage.error(res.msg)
+        }
+      })
+    }
+  })
+}
+
 
 </script>
 
@@ -161,10 +169,10 @@ const exportAll = () => {
   <div class="home">
 
     <div class="main-search">
-      <el-input v-model="name" placeholder="请输入用户账户"/>
+      <el-input v-model="name" placeholder="请输入数据字典关键字"/>
       <el-button
           type="primary"
-          @click="searchUser"
+          @click="searchdict"
       >
         <el-icon style="vertical-align: middle">
           <Search/>
@@ -256,30 +264,38 @@ const exportAll = () => {
           stripe border
           style="width: 100%;"
       >
-        <el-table-column type="selection" width="55"/>
-        <el-table-column prop="username" label="账户" />
-        <el-table-column prop="name" label="昵称" />
-        <el-table-column prop="gender" label="性别" />
-        <el-table-column prop="email" label="邮箱" />
-        <el-table-column prop="createTime" label="注册时间" />
-        <el-table-column label="操作" width="180">
+       <el-table-column type="selection" width="55"/>
+
+        <el-table-column prop="id" label="id"></el-table-column>
+        <el-table-column prop="code" label="编码"></el-table-column>
+        <el-table-column prop="content" label="内容">
           <template #default="scope">
-            <el-button type="primary" @click="dialogEdit(scope.row)">编辑</el-button>
-            <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
-              <template #reference>
-                <el-button type="danger">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <el-icon v-if="scope.row.content" size="30px">
+              <component :is="scope.row.content"></component>
+            </el-icon>
           </template>
         </el-table-column>
+        <el-table-column prop="type" label="类型"></el-table-column>
+
+
+       <el-table-column label="操作" width="180">
+         <template #default="scope">
+           <el-button type="primary" @click="dialogEdit(scope.row)">编辑</el-button>
+           <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
+             <template #reference>
+               <el-button type="danger">删除</el-button>
+             </template>
+           </el-popconfirm>
+         </template>
+       </el-table-column>
       </el-table>
     </div>
 
     <!--  分页导航   -->
     <div style="margin: 10px 0">
       <el-pagination
-          @current-change="currentPageNumChange"
-          @size-change="sizeChange"
+          @current-change="load"
+          @size-change="load"
           v-model:current-page="pageNum"
           v-model:page-size="pageSize"
           background
@@ -290,29 +306,39 @@ const exportAll = () => {
     </div>
 
     <!-- 对话框 -->
-    <el-dialog v-model="dialogData.dialogFormVisible" :title="dialogData.title" draggable :close-on-click-modal="false">
+    <el-dialog
+        v-model="dialogData.dialogFormVisible"
+        :title="dialogData.title" draggable
+        :close-on-click-modal="false"
+        width="50%"
+    >
       <el-form
           ref="dialogFormRef"
           :model="dialogData.formData"
           :rules="dialogRules"
           size="large"
           status-icon
+          label-width="80px"
+          style="padding: 0 20px"
       >
-        <el-form-item prop="username">
-          <el-input
-              v-model="dialogData.formData.username"
-              placeholder="请填入账号"
-              clearable
-              :prefix-icon="User"
-              :disabled="dialogData.title !== undefined && dialogData.title === '编辑用户'"
-          />
+
+        <el-form-item prop="code" label="编码">
+          <el-input v-model="dialogData.formData.code" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item prop="content" label="内容">
+          <el-input v-model="dialogData.formData.content" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item prop="type" label="类型">
+          <el-input v-model="dialogData.formData.type" autocomplete="off"></el-input>
+        </el-form-item>
+
+
       </el-form>
 
       <template #footer>
       <span class="dialog-footer">
         <el-button @click="closeDialog">关闭</el-button>
-        <el-button type="primary" @click="dialogData.dialogFormVisible = false">
+        <el-button type="primary" @click="save">
           保存
         </el-button>
       </span>

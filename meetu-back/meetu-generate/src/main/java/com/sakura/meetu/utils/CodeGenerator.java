@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.baomidou.mybatisplus.generator.fill.Column;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.io.ClassPathResource;
 
@@ -39,11 +40,11 @@ public class CodeGenerator {
     /**
      * 表名
      */
-    private static final String TABLE = "dynamic";
+    private static final String TABLE = "im";
     /**
      * 菜单名称
      */
-    private static final String MODULE_NAME = "动态";
+    private static final String MODULE_NAME = "聊天室";
     /**
      * java代码的包名
      */
@@ -70,7 +71,7 @@ public class CodeGenerator {
 
     public static void main(String[] args) {
         // 生成Java代码
-//        generateJava(TABLE);
+        generateJava(TABLE);
 
         // 生成 Vue 代码 加 AXIOS 封装
         generateVue(TABLE);
@@ -253,7 +254,7 @@ public class CodeGenerator {
                 .strategyConfig(builder -> {
                     builder.controllerBuilder().enableFileOverride().enableRestStyle().enableHyphenStyle()
                             .serviceBuilder().enableFileOverride()
-                            .mapperBuilder().enableFileOverride()
+                            .mapperBuilder().enableFileOverride().mapperAnnotation(Mapper.class)
                             .entityBuilder().enableFileOverride().enableLombok()
                             .logicDeleteColumnName("deleted")
                             .addTableFills(new Column("create_time", FieldFill.INSERT))
