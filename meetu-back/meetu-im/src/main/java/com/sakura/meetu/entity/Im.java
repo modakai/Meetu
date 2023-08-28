@@ -1,30 +1,30 @@
 package com.sakura.meetu.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import cn.hutool.core.annotation.Alias;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sakura.meetu.config.LDTConfig;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 /**
-* <p>
-* 聊天信息表
-* </p>
-*
-* @author sakura
-* @since 2023-08-20
-*/
+ * <p>
+ * 聊天信息表
+ * </p>
+ *
+ * @author sakura
+ * @since 2023-08-20
+ */
 @Getter
 @Setter
+@Builder
 @ApiModel(value = "Im对象", description = "聊天信息表")
 public class Im implements Serializable {
 
@@ -65,7 +65,7 @@ public class Im implements Serializable {
     // 更新时间
     @ApiModelProperty("更新时间")
     @Alias("更新时间")
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.UPDATE)
     @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
     @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
     private LocalDateTime updateTime;

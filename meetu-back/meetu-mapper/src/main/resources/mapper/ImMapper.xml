@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sakura.meetu.mapper.ImMapper">
+    <cache />
+    <resultMap id="imVo" type="com.sakura.meetu.entity.ImVo">
+        <id property="id" column="id"></id>
+        <result property="uid" column="uid"></result>
+        <result property="username" column="username"></result>
+        <result property="avatar" column="avatar"></result>
+        <result property="intro" column="intro"></result>
+        <result property="text" column="text"></result>
+        <result property="createTime" column="create_time"></result>
+    </resultMap>
+    <select id="selectImMessageLimit" resultMap="imVo">
+        SELECT
+            `im`.id, `im`.uid, `im`.create_time,  `im`.text, username, intro, avatar
+        FROM
+            `im`
+            LEFT JOIN sys_user ON im.uid = sys_user.uid
+        order by id desc
+        limit #{nums}
+    </select>
+    <select id="selectAllWhere" resultMap="imVo">
+        SELECT
+            im.id, im.uid, im.text, im.img, im.create_time, sys_user.username, sys_user.avatar
+        FROM
+            im
+        LEFT JOIN sys_user ON im.uid = sys_user.uid
+        <where>
+            <if test="username != ''">
+                sys.username LIKE #{username} '%'
+            </if>
+            <if test="text != ''">
+                and im.text LIKE #{text} '%'
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

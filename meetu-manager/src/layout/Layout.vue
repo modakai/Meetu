@@ -20,8 +20,7 @@ const logout = () => {
     if (res.code === '200') {
       // 重载 manager中的数据
       useUserStore().reset()
-      // 跳转登入页
-      router.push("/login")
+
       ElMessage.success('退出成功')
     } else {
       ElMessage.error(res.msg)

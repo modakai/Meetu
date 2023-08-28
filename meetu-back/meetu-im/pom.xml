@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.sakura.meetu</groupId>
+    <groupId>com.sakura</groupId>
     <artifactId>meetu-im</artifactId>
 
     <properties>

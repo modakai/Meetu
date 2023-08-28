@@ -125,11 +125,11 @@ public class CodeGenerator {
             // 拿到字段名的 驼峰命名法
             String camelCaseName = StrUtil.toCamelCase(tableColumn.getColumnName());
             if (tableColumn.getColumnName().endsWith("img")) {
-                builder.append(SPACE8).append("<el-table-column label=\"图片\"><template #default=\"scope\"><el-image preview-teleported style=\"width: 100px; height: 100px\" :src=\"scope.row.").append(camelCaseName).append("\" :preview-src-list=\"[scope.row.img]\"></el-image></template></el-table-column>\n");
+                builder.append(SPACE8).append("<el-table-column label=\"图片\">\r\n<template #default=\"scope\">\r\n<el-image preview-teleported style=\"width: 100px; height: 100px\" :src=\"scope.row.").append(camelCaseName).append("\" :preview-src-list=\"[scope.row.img]\"></el-image>\r\n</template>\r\n</el-table-column>\r\n");
             } else if (tableColumn.getColumnName().endsWith("file")) {
-                builder.append(SPACE8).append("<el-table-column label=\"文件\"><template #default=\"scope\"> <a :href=\"scope.row.").append(camelCaseName).append("\" target=\"_blank\" style=\"text-decoration: none; color: dodgerblue\">点击下载</a></template></el-table-column>\n");
+                builder.append(SPACE8).append("<el-table-column label=\"文件\">\r\n<template #default=\"scope\"> \r\n<a :href=\"scope.row.").append(camelCaseName).append("\" target=\"_blank\" style=\"text-decoration: none; color: dodgerblue\">点击下载</a></template></el-table-column>\r\n");
             } else {
-                builder.append(SPACE8).append("<el-table-column prop=\"").append(camelCaseName).append("\" label=\"").append(tableColumn.getColumnComment()).append("\"></el-table-column>\n");
+                builder.append(SPACE8).append("<el-table-column prop=\"").append(camelCaseName).append("\" label=\"").append(tableColumn.getColumnComment()).append("\"></el-table-column>\r\n");
             }
 
         }

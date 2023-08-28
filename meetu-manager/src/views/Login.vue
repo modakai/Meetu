@@ -53,6 +53,7 @@ const login = () => {
           :rules="rules"
           size="large"
           status-icon
+          @keydown.enter="login"
       >
         <div class="tips">登 入</div>
         <el-form-item prop="username">
@@ -67,7 +68,6 @@ const login = () => {
               style="width: 100%;
               font-size: 20px"
               @click.prevent="login"
-              @keydown.enter="login"
           >
             Login
           </el-button>

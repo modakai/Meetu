@@ -14,7 +14,8 @@ const pageSize = ref(5)
 const total = ref(0)
 const data = reactive({
   table: [],
-  permissionTable: []
+  permissionTable: [],
+  pageMenus: useUserStore().getPageMenus(),
 })
 
 const permissionTreeRef = ref()
@@ -225,6 +226,7 @@ const logout = () => {
 
     <div style="margin: 10px 0;">
       <el-button
+          v-show="data.pageMenus.includes('role.add')"
           type="primary"
           style="color: white"
           color="#00bd16"
@@ -237,9 +239,15 @@ const logout = () => {
       </el-button>
 
       <!-- 批量删除 -->
-      <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
+
+      <el-popconfirm
+
+          title="您确定要执行此操作吗？"
+          @confirm="confirmDelBatch"
+      >
         <template #reference>
           <el-button
+              v-show="data.pageMenus.includes('role.deleteBatch')"
               type="danger"
               style="color: white"
           >
@@ -251,12 +259,12 @@ const logout = () => {
         </template>
       </el-popconfirm>
     </div>
-
     <!-- 表格 -->
     <div style="margin: 20px 0">
       <el-table
           :data="data.table"
           @selection-change="handleSelectionChange"
+          row-key="id"
           stripe border
           style="width: 100%;"
       >
@@ -264,16 +272,24 @@ const logout = () => {
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="flag" label="唯一标识"></el-table-column>
 
-       <el-table-column label="操作" width="180">
-         <template #default="scope">
-           <el-button type="primary" @click="dialogEdit(scope.row)">编辑</el-button>
-           <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
-             <template #reference>
-               <el-button type="danger">删除</el-button>
-             </template>
-           </el-popconfirm>
-         </template>
-       </el-table-column>
+        <el-table-column label="操作" width="180">
+          <template #default="scope">
+            <el-button
+                v-show="data.pageMenus.includes('role.edit')"
+                type="primary" @click="dialogEdit(scope.row)"
+            >编辑</el-button>
+
+            <el-popconfirm
+
+                title="您确定要删除吗？"
+                @confirm="del(scope.row)"
+            >
+              <template #reference>
+                <el-button v-show="data.pageMenus.includes('role.delete')" type="danger">删除</el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
 
@@ -299,6 +315,7 @@ const logout = () => {
         width="50%"
     >
       <el-form
+          @keyup.enter="save"
           ref="dialogFormRef"
           :model="dialogData.formData"
           :rules="dialogRules"

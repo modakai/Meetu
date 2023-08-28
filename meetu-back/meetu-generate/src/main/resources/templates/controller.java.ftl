@@ -58,47 +58,47 @@ public class ${table.controllerName} {
     }
 
     @PostMapping
-<#--    @SaCheckPermission("${table.entityPath}.add")-->
+    @SaCheckPermission("${table.entityPath}.add")
     public Result save(@RequestBody ${entity} ${table.entityPath}) {
         ${table.entityPath}Service.save(${table.entityPath});
         return Result.success();
     }
 
     @PutMapping
-<#--    @SaCheckPermission("${table.entityPath}.edit")-->
+    @SaCheckPermission("${table.entityPath}.edit")
     public Result update(@RequestBody ${entity} ${table.entityPath}) {
         ${table.entityPath}Service.updateById(${table.entityPath});
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
-<#--    @SaCheckPermission("${table.entityPath}.delete")-->
+    @SaCheckPermission("${table.entityPath}.delete")
     public Result delete(@PathVariable Integer id) {
         ${table.entityPath}Service.removeById(id);
         return Result.success();
     }
 
     @PostMapping("/del/batch")
-<#--    @SaCheckPermission("${table.entityPath}.deleteBatch")-->
+    @SaCheckPermission("${table.entityPath}.deleteBatch")
     public Result deleteBatch(@RequestBody List<Integer> ids) {
         ${table.entityPath}Service.removeByIds(ids);
         return Result.success();
     }
 
     @GetMapping
-<#--    @SaCheckPermission("${table.entityPath}.list")-->
+    @SaCheckPermission("${table.entityPath}.list")
     public Result findAll() {
         return Result.success(${table.entityPath}Service.list());
     }
 
     @GetMapping("/{id}")
-<#--    @SaCheckPermission("${table.entityPath}.list")-->
+    @SaCheckPermission("${table.entityPath}.list")
     public Result findOne(@PathVariable Integer id) {
         return Result.success(${table.entityPath}Service.getById(id));
     }
 
     @GetMapping("/page")
-<#--    @SaCheckPermission("${table.entityPath}.list")-->
+    @SaCheckPermission("${table.entityPath}.list")
     public Result findPage(@RequestParam(defaultValue = "") String name,
                         @RequestParam Integer pageNum,
                         @RequestParam Integer pageSize) {
@@ -111,7 +111,7 @@ public class ${table.controllerName} {
     * 导出接口
     */
     @GetMapping("/export")
-<#--    @SaCheckPermission("${table.entityPath}.export")-->
+    @SaCheckPermission("${table.entityPath}.export")
     public void export(HttpServletResponse response) throws Exception {
         // 从数据库查询出所有的数据
         List<${entity}> list = ${table.entityPath}Service.list();

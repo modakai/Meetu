@@ -10,14 +10,10 @@ const pageNum = ref(1)
 const pageSize = ref(5)
 const total = ref(0)
 const data = reactive({
-  table: [
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'},
-    {id: 1, name: 'sakura1', address: '南宁市', phone: '12314'}
-  ],
+  table: [],
   roles: [],
-  pageMenus: useUserStore().getPageMenus()
+  pageMenus: useUserStore().getPageMenus(),
+  menus: useUserStore().getMenus()
 })
 
 // 对话框
@@ -285,6 +281,7 @@ const save = () => {
       <el-table
           :data="data.table"
           @selection-change="handleSelectionChange"
+          row-key="id"
           stripe border
           style="width: 100%;"
       >
@@ -299,14 +296,25 @@ const save = () => {
           </template>
         </el-table-column>
 
-
         <el-table-column prop="createTime" label="注册时间" />
         <el-table-column label="操作" width="180">
           <template #default="scope">
-            <el-button type="primary" @click="dialogEdit(scope.row)">编辑</el-button>
+            <el-button
+                v-show="data.pageMenus.includes('user.edit')"
+                type="primary"
+                @click="dialogEdit(scope.row)"
+            >
+              编辑
+            </el-button>
+
             <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
               <template #reference>
-                <el-button type="danger">删除</el-button>
+                <el-button
+                    type="danger"
+                    v-show="data.pageMenus.includes('user.delete')"
+                >
+                  删除
+                </el-button>
               </template>
             </el-popconfirm>
           </template>
@@ -330,8 +338,10 @@ const save = () => {
 
     <!-- 对话框 -->
     <el-dialog
-        v-model="dialogData.dialogFormVisible" :title="dialogData.title"
-        draggable :close-on-click-modal="false"  width="50%"
+        v-model="dialogData.dialogFormVisible"
+        :title="dialogData.title" draggable
+        :close-on-click-modal="false"
+        width="50%"
     >
       <el-form
           ref="dialogFormRef"
@@ -341,13 +351,14 @@ const save = () => {
           status-icon
           label-width="80px"
           style="padding: 0 20px"
+          @keyup.enter="save"
       >
         <el-form-item prop="username" label="账号">
           <el-input
               v-model="dialogData.formData.username"
               placeholder="请填入账号"
               clearable
-              :prefix-icon="User"
+
               :disabled="dialogData.title !== undefined && dialogData.title === '编辑用户'"
           />
         </el-form-item>
@@ -355,14 +366,13 @@ const save = () => {
           <el-input
               v-model="dialogData.formData.email"
               placeholder="请填入邮箱"
-              :prefix-icon="Message"
           />
         </el-form-item>
         <el-form-item prop="name" label="昵称">
           <el-input
               v-model="dialogData.formData.name"
               placeholder="请填入昵称"
-              :prefix-icon="User"
+
           />
         </el-form-item>
         <el-form-item prop="role" label="角色">

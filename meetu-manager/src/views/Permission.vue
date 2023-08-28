@@ -119,9 +119,6 @@ const save = () => {
 
 
 // 自定义业务 数据
-// 父级id 数据 树状
-const pidSelects = ref([])
-
 
 // 父级选择器
 const handleNodeClick = (data) => {
@@ -206,7 +203,7 @@ const changeHide = (row) => {
           </template>
         </el-table-column>
 
-        <el-table-column prop="auth" label="权限"></el-table-column>
+        <el-table-column prop="auth" label="权限" width="130"></el-table-column>
         <el-table-column prop="pid" label="父级"></el-table-column>
         <el-table-column prop="type" label="类型">
           <template #default="scope">
@@ -256,6 +253,7 @@ const changeHide = (row) => {
           status-icon
           label-width="80px"
           style="padding: 0 20px"
+          @keyup.enter="save"
       >
 
         <el-form-item prop="type" label="类型">

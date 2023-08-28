@@ -1,9 +1,9 @@
 package com.sakura.meetu.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sakura.meetu.entity.Dynamic;
 import com.sakura.meetu.mapper.DynamicMapper;
 import com.sakura.meetu.service.IDynamicService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

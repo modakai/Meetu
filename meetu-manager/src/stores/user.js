@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {setRoutes} from "@/router";
+import router, {setRoutes} from "@/router";
 
 export const useUserStore = defineStore('manager', {
     state: () => ({
@@ -15,6 +15,8 @@ export const useUserStore = defineStore('manager', {
         reset() {
             // 清除 浏览器的 token
             localStorage.removeItem('manager')
+            // 跳转登入页
+            router.push("/login")
         },
         getMenus() {
             return this.managerInfo.menus || []

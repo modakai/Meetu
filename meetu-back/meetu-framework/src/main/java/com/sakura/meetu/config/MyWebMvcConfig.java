@@ -33,11 +33,17 @@ public class MyWebMvcConfig extends WebMvcConfigurationSupport {
 
     );
 
+    // 聊天室放行
+    private static final List<String> EXCLUDE_PATH_IM = List.of(
+            "/api/im/init/{limit}"
+    );
+
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SaInterceptor(handler -> StpUtil.checkLogin()))
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(EXCLUDE_PATH_COMMON)
+                .excludePathPatterns(EXCLUDE_PATH_IM)
                 // 排除Swagger 拦截
                 .excludePathPatterns("/swagger**/**", "/webjars/**", "/v3/**", "/doc.html", "");
     }

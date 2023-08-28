@@ -9,7 +9,8 @@ const pageNum = ref(1)
 const pageSize = ref(5)
 const total = ref(0)
 const data = reactive({
-  table: []
+  table: [],
+  pageMenus: useUserStore().getPageMenus(),
 })
 
 // 对话框
@@ -195,6 +196,7 @@ const save = () => {
 
     <div style="margin: 10px 0;">
       <el-button
+          v-show="data.pageMenus.includes('dict.add')"
           type="primary"
           style="color: white"
           color="#00bd16"
@@ -207,6 +209,7 @@ const save = () => {
       </el-button>
 
       <el-button
+          v-show="data.pageMenus.includes('dict.export')"
           type="primary"
           style="color: white"
           @click="exportAll"
@@ -218,6 +221,7 @@ const save = () => {
       </el-button>
 
       <el-upload
+          v-show="data.pageMenus.includes('dict.import')"
           class="upload-box"
           :show-file-list="false"
           :action="importDataUrl"
@@ -241,7 +245,11 @@ const save = () => {
 
       <!-- 批量删除 -->
 
-      <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
+      <el-popconfirm
+          v-show="data.pageMenus.includes('dict.deleteBatch')"
+          title="您确定要执行此操作吗？"
+          @confirm="confirmDelBatch"
+      >
         <template #reference>
           <el-button
               type="danger"
@@ -280,8 +288,16 @@ const save = () => {
 
        <el-table-column label="操作" width="180">
          <template #default="scope">
-           <el-button type="primary" @click="dialogEdit(scope.row)">编辑</el-button>
-           <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
+           <el-button
+               v-show="data.pageMenus.includes('dict.edit')"
+               type="primary" @click="dialogEdit(scope.row)"
+           >编辑</el-button>
+
+           <el-popconfirm
+               v-show="data.pageMenus.includes('dict.delete')"
+               title="您确定要删除吗？"
+               @confirm="del(scope.row)"
+           >
              <template #reference>
                <el-button type="danger">删除</el-button>
              </template>
