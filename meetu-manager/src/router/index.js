@@ -13,6 +13,11 @@ const router = createRouter({
       redirect: '/home',
       children: [
         { path: 'home', name: 'Home', component: () => import('../views/Home.vue') },
+        {
+          path: '/person',
+          name: 'Person',
+          component: () => import('@/views/Person.vue')
+        },
       ]
     },
     {
@@ -20,6 +25,7 @@ const router = createRouter({
       name: 'Login',
       component: () => import('@/views/Login.vue')
     },
+
     {
       path: '/404',
       name: '404',
@@ -30,6 +36,7 @@ const router = createRouter({
 
 // 注意：刷新页面会导致页面路由重置
 export const setRoutes = (menus) => {
+
   // 判断是否有菜单传进来 如果不传值则会进入到该方法
   if (!menus || !menus.length) {
     // 该方法会从本地存储中获取对应的菜单数据
@@ -57,7 +64,6 @@ export const setRoutes = (menus) => {
     })
   }
 }
-
 setRoutes()
 
 

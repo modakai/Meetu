@@ -1,16 +1,16 @@
 <script setup>
-
 import { nextTick, reactive, ref} from "vue";
-import {delBatch, delOne, dynamicPage, saveOrUpdate} from "@/api/dynamicApi";
-import {useUserStore} from "@/stores/user";
-import {ElMessage} from "element-plus";
+import { delBatch, dynamicPage,  delOne, saveOrUpdate } from "@/api/dynamicApi";
+import { useUserStore } from "@/stores/user";
+import { ElMessage } from "element-plus";
 
 const name = ref('')
 const pageNum = ref(1)
 const pageSize = ref(5)
 const total = ref(0)
 const data = reactive({
-  table: []
+  table: [],
+  pageMenus: useUserStore().getPageMenus(),
 })
 
 // 对话框
@@ -42,18 +42,8 @@ const load = () => {
 }
 load()
 
-// 切换页码
-const currentPageNumChange = (newPageNum) => {
-  pageNum.value = newPageNum
-  load()
-}
-// 切换显示条数
-const sizeChange = (newSize) => {
-  pageSize.value = newSize
-  load()
-}
 // 搜索用户
-const searchDynamic = () => {
+const searchdynamic = () => {
   load()
 }
 
@@ -86,19 +76,6 @@ const resetDialog = (data) => {
 // 关闭对话框
 const closeDialog = () => {
   dialogData.dialogFormVisible = false
-}
-
-// 删除
-const del = (data) => {
-  // 写接口
-  delOne(data.id).then(res => {
-    if (res.code === '200') {
-      ElMessage.success('删除成功')
-      load()
-    } else {
-      ElMessage.error(res.msg)
-    }
-  })
 }
 
 // 批量删除
@@ -157,11 +134,22 @@ const exportAll = () => {
  window.open("http://localhost:8848/api/dynamic/export")
 }
 
-// 添加 或者 修改
+// 删除
+const del = (data) => {
+  // 写接口
+  delOne(data.id).then(res => {
+    if (res.code === '200') {
+      ElMessage.success('删除成功')
+      load()
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
 const save = () => {
   dialogFormRef.value.validate(valid => {   // valid就是校验的结果
     if (valid) {
-      console.log(dialogData.formData)
       saveOrUpdate('/dynamic', dialogData.formData).then(res => {
         if (res.code === '200') {
           ElMessage.success('保存成功')
@@ -175,6 +163,7 @@ const save = () => {
   })
 }
 
+
 </script>
 
 <template>
@@ -184,7 +173,7 @@ const save = () => {
       <el-input v-model="name" placeholder="请输入动态关键字"/>
       <el-button
           type="primary"
-          @click="searchDynamic"
+          @click="searchdynamic"
       >
         <el-icon style="vertical-align: middle">
           <Search/>
@@ -206,73 +195,77 @@ const save = () => {
     </div>
 
     <div style="margin: 10px 0;">
-      <el-button
-          type="primary"
-          style="color: white"
-          color="#00bd16"
-          @click="dialogAdd"
-      >
-        <el-icon style="vertical-align: middle">
-          <Plus />
-        </el-icon>
-        <span style="vertical-align: middle">新增</span>
-      </el-button>
-
-      <el-button
-          type="primary"
-          style="color: white"
-          @click="exportAll"
-      >
-        <el-icon style="vertical-align: middle">
-          <Top />
-        </el-icon>
-        <span style="vertical-align: middle">导出</span>
-      </el-button>
-
-      <el-upload
-          class="upload-box"
-          :show-file-list="false"
-          :action="importDataUrl"
-          :accept="acceptTypes"
-          :headers="importHeaders"
-          :before-upload="beforeImport"
-          :on-error="importError"
-          :on-success="importSuccess"
-      >
-        <el-button
-            type="primary"
-            style="color: white"
-        >
-          <el-icon style="vertical-align: middle">
-            <Bottom />
-          </el-icon>
-          <span style="vertical-align: middle">导入</span>
-        </el-button>
-
-      </el-upload>
-
-      <!-- 批量删除 -->
-
-      <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
-        <template #reference>
           <el-button
-              type="danger"
+              v-show="data.pageMenus.includes('dynamic.add')"
+              type="primary"
               style="color: white"
+              color="#00bd16"
+              @click="dialogAdd"
           >
             <el-icon style="vertical-align: middle">
-              <Delete />
+              <Plus />
             </el-icon>
-            <span style="vertical-align: middle">批量删除</span>
+            <span style="vertical-align: middle">新增</span>
           </el-button>
-        </template>
-      </el-popconfirm>
-    </div>
+
+          <el-button
+              v-show="data.pageMenus.includes('dynamic.import')"
+              type="primary"
+              style="color: white"
+              @click="exportAll"
+          >
+            <el-icon style="vertical-align: middle">
+              <Top />
+            </el-icon>
+            <span style="vertical-align: middle">导出</span>
+          </el-button>
+
+          <el-upload
+              v-show="data.pageMenus.includes('dynamic.export')"
+              class="upload-box"
+              :show-file-list="false"
+              :action="importDataUrl"
+              :accept="acceptTypes"
+              :headers="importHeaders"
+              :before-upload="beforeImport"
+              :on-error="importError"
+              :on-success="importSuccess"
+          >
+            <el-button
+                type="primary"
+                style="color: white"
+            >
+              <el-icon style="vertical-align: middle">
+                <Bottom />
+              </el-icon>
+              <span style="vertical-align: middle">导入</span>
+            </el-button>
+
+          </el-upload>
+
+          <!-- 批量删除 -->
+          <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
+            <template #reference>
+              <el-button
+                  v-show="data.pageMenus.includes('dynamic.deleteBatch')"
+                  type="danger"
+                  style="color: white"
+              >
+                <el-icon style="vertical-align: middle">
+                  <Delete />
+                </el-icon>
+                <span style="vertical-align: middle">批量删除</span>
+              </el-button>
+            </template>
+          </el-popconfirm>
+        </div>
 
     <!-- 表格 -->
     <div style="margin: 20px 0">
       <el-table
           :data="data.table"
           @selection-change="handleSelectionChange"
+          row-key="id"
           stripe border
           style="width: 100%;"
       >
@@ -281,20 +274,30 @@ const save = () => {
         <el-table-column prop="content" label="动态内容"></el-table-column>
         <el-table-column prop="descr" label="描述"></el-table-column>
         <el-table-column prop="id" label="编号"></el-table-column>
-        <el-table-column prop="imgs" label="图片"></el-table-column>
+<!--        <el-table-column prop="imgs" label="图片"></el-table-column>-->
         <el-table-column prop="name" label="动态标题"></el-table-column>
         <el-table-column prop="uid" label="发布动态用户的唯一标识"></el-table-column>
-        <el-table-column prop="verifyStatus" label="审核状态: 0 表示审核中, 1 表示 审核通过  -1 表示 驳回动态"></el-table-column>
-        <el-table-column prop="verifyTime" label="审核时间"></el-table-column>
         <el-table-column prop="views" label="浏览量"></el-table-column>
 
 
        <el-table-column label="操作" width="180">
          <template #default="scope">
-           <el-button type="primary" @click="dialogEdit(scope.row)">编辑</el-button>
+           <el-button
+               v-show="data.pageMenus.includes('dynamic.edit')"
+               type="primary"
+               @click="dialogEdit(scope.row)"
+           >
+             编辑
+           </el-button>
+
            <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
              <template #reference>
-               <el-button type="danger">删除</el-button>
+               <el-button
+                   type="danger"
+                   v-show="data.pageMenus.includes('dynamic.delete')"
+               >
+                 删除
+               </el-button>
              </template>
            </el-popconfirm>
          </template>
@@ -305,61 +308,66 @@ const save = () => {
     <!--  分页导航   -->
     <div style="margin: 10px 0">
       <el-pagination
-          @current-change="currentPageNumChange"
-          @size-change="sizeChange"
-          v-model:current-page="pageNum"
-          v-model:page-size="pageSize"
-          background
-          :page-sizes="[1, 5, 10, 20]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
+        @current-change="load"
+        @size-change="load"
+        v-model:current-page="pageNum"
+        v-model:page-size="pageSize"
+        background
+        :page-sizes="[1, 5, 10, 20]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
       />
     </div>
 
     <!-- 对话框 -->
-    <el-dialog v-model="dialogData.dialogFormVisible" :title="dialogData.title" draggable :close-on-click-modal="false">
+    <el-dialog
+        v-model="dialogData.dialogFormVisible"
+        :title="dialogData.title" draggable
+        :close-on-click-modal="false"
+        width="50%"
+    >
       <el-form
           ref="dialogFormRef"
           :model="dialogData.formData"
           :rules="dialogRules"
           size="large"
           status-icon
+          label-width="80px"
+          style="padding: 0 20px"
+          @keyup.enter="save"
       >
 
-        <el-form-item prop="name" label="动态标题">
-          <el-input v-model="dialogData.formData.name" autocomplete="off"></el-input>
-        </el-form-item>
         <el-form-item prop="content" label="动态内容">
           <el-input v-model="dialogData.formData.content" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item prop="descr" label="描述">
           <el-input v-model="dialogData.formData.descr" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item prop="imgs" label="图片">
-          <el-input v-model="dialogData.formData.imgs" autocomplete="off"></el-input>
+<!--        <el-form-item prop="imgs" label="图片">-->
+<!--          <el-input v-model="dialogData.formData.imgs" autocomplete="off"></el-input>-->
+<!--        </el-form-item>-->
+        <el-form-item prop="name" label="动态标题">
+          <el-input v-model="dialogData.formData.name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item prop="uid" label="发布动态用户的唯一标识">
           <el-input v-model="dialogData.formData.uid" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item prop="verifyStatus" label="审核状态: 0 表示审核中, 1 表示 审核通过  -1 表示 驳回动态">
-          <el-input v-model="dialogData.formData.verifyStatus" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item prop="verifyTime" label="审核时间">
-          <el-input v-model="dialogData.formData.verifyTime" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item prop="views" label="浏览量">
           <el-input v-model="dialogData.formData.views" autocomplete="off"></el-input>
         </el-form-item>
 
+
       </el-form>
 
       <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="closeDialog">关闭</el-button>
-        <el-button type="primary" @click="save">
-          保存
-        </el-button>
-      </span>
+          <span class="dialog-footer">
+            <el-button @click="closeDialog">关闭</el-button>
+            <el-button
+                type="primary" @click="save"
+            >
+              保存
+            </el-button>
+          </span>
       </template>
     </el-dialog>
 

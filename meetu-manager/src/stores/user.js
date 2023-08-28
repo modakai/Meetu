@@ -26,6 +26,11 @@ export const useUserStore = defineStore('manager', {
         },
         getManagerRole() {
             return this.managerInfo.role || ''
+        },
+        setUser(data) {
+            this.managerInfo = {...this.managerInfo, data}
+
+            setRoutes(managerInfo.menus)
         }
     },
     getters: {

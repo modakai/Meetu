@@ -1,4 +1,4 @@
-package com.sakura.meetu.service.impl;
+package com.sakura.meetu.service;
 
 import cn.hutool.core.lang.Dict;
 import cn.hutool.json.JSONUtil;
@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sakura.meetu.entity.Im;
 import com.sakura.meetu.entity.ImVo;
 import com.sakura.meetu.entity.User;
-import com.sakura.meetu.service.IImService;
-import com.sakura.meetu.service.IUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

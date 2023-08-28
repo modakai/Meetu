@@ -2,7 +2,9 @@ package com.sakura.meetu.entity;
 
 import cn.hutool.core.annotation.Alias;
 import com.baomidou.mybatisplus.annotation.*;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sakura.meetu.config.LDTConfig;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -17,7 +19,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author sakura
- * @since 2023-07-18
+ * @since 2023-08-28
  */
 @Getter
 @Setter
@@ -59,16 +61,6 @@ public class Dynamic implements Serializable {
     @Alias("描述")
     private String descr;
 
-    // 审核时间
-    @ApiModelProperty("审核时间")
-    @Alias("审核时间")
-    private LocalDateTime verifyTime;
-
-    // 审核状态: 0 表示审核中, 1 表示 审核通过  -1 表示 驳回动态
-    @ApiModelProperty("审核状态: 0 表示审核中, 1 表示 审核通过  -1 表示 驳回动态")
-    @Alias("审核状态: 0 表示审核中, 1 表示 审核通过  -1 表示 驳回动态")
-    private Byte verifyStatus;
-
     // 软删除
     @ApiModelProperty("软删除")
     @Alias("软删除")
@@ -79,13 +71,15 @@ public class Dynamic implements Serializable {
     @ApiModelProperty("创建时间")
     @Alias("创建时间")
     @TableField(fill = FieldFill.INSERT)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
+    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
     private LocalDateTime createTime;
 
     // 更新时间
     @ApiModelProperty("更新时间")
     @Alias("更新时间")
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
+    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
     private LocalDateTime updateTime;
 }

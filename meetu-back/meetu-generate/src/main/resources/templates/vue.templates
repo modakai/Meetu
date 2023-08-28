@@ -42,16 +42,6 @@ const load = () => {
 }
 load()
 
-// 切换页码
-const currentPageNumChange = (newPageNum) => {
-  pageNum.value = newPageNum
-  load()
-}
-// 切换显示条数
-const sizeChange = (newSize) => {
-  pageSize.value = newSize
-  load()
-}
 // 搜索用户
 const search{lowerEntity} = () => {
   load()
@@ -311,14 +301,14 @@ const save = () => {
     <!--  分页导航   -->
     <div style="margin: 10px 0">
       <el-pagination
-          @current-change="currentPageNumChange"
-          @size-change="sizeChange"
-          v-model:current-page="pageNum"
-          v-model:page-size="pageSize"
-          background
-          :page-sizes="[1, 5, 10, 20]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
+        @current-change="load"
+        @size-change="load"
+        v-model:current-page="pageNum"
+        v-model:page-size="pageSize"
+        background
+        :page-sizes="[1, 5, 10, 20]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
       />
     </div>
 

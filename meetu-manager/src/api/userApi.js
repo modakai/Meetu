@@ -41,3 +41,9 @@ export const saveOrUpdate = (url, data) => requests({
     method: data.id ? 'put' : 'post',
     data: data
 })
+
+export const modifyUser = (data) => requests({
+    url: '/user/modify',
+    method: 'put',
+    data: JSON.stringify(data)
+})

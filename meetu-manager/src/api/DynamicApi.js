@@ -1,6 +1,6 @@
 import requests from "@/api/requests";
 
-// 分查询
+// 分页查询
 export const dynamicPage = (data) => requests({
     url: '/dynamic/page',
     method: 'GET',
@@ -10,12 +10,14 @@ export const dynamicPage = (data) => requests({
         pageSize: data.pageSize
     }
 })
-// 批量删除
+
+// 批量删除用户
 export const delBatch = (data) => requests({
     url: '/dynamic/del/batch',
     method: 'POST',
     data: JSON.stringify(data)
 })
+
 
 // 删除
 export const delOne = (id) => requests({

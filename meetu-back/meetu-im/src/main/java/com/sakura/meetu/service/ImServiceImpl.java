@@ -1,10 +1,9 @@
-package com.sakura.meetu.service.impl;
+package com.sakura.meetu.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sakura.meetu.entity.Im;
 import com.sakura.meetu.entity.ImVo;
 import com.sakura.meetu.mapper.ImMapper;
-import com.sakura.meetu.service.IImService;
 import com.sakura.meetu.utils.Result;
 import org.springframework.stereotype.Service;
 

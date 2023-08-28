@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * </p>
  *
  * @author sakura
- * @since 2023-07-18
+ * @since 2023-08-28
  */
 public interface IDynamicService extends IService<Dynamic> {
 

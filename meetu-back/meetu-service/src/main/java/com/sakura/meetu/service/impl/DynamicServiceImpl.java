@@ -1,9 +1,9 @@
 package com.sakura.meetu.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sakura.meetu.entity.Dynamic;
 import com.sakura.meetu.mapper.DynamicMapper;
 import com.sakura.meetu.service.IDynamicService;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * </p>
  *
  * @author sakura
- * @since 2023-07-18
+ * @since 2023-08-28
  */
 @Service
 public class DynamicServiceImpl extends ServiceImpl<DynamicMapper, Dynamic> implements IDynamicService {

@@ -183,7 +183,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new RuntimeException(e);
         }
 
-        return Result.success();
+        return Result.success(user);
     }
 
     @Override
