@@ -25,6 +25,7 @@ public class MyWebMvcConfig extends WebMvcConfigurationSupport {
             "/api/register",
             "/api/email",
             "/api/file/upload",
+            "/api/file/download/**",
             "/**/export"
     );
 

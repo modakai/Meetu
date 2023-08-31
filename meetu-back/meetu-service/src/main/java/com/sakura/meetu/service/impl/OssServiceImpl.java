@@ -1,8 +1,12 @@
 package com.sakura.meetu.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.OSSException;
+import com.aliyun.oss.model.OSSObject;
+import com.aliyun.oss.model.ObjectMetadata;
 import com.sakura.meetu.exception.ServiceException;
 import com.sakura.meetu.service.OssService;
 import com.sakura.meetu.utils.Result;
@@ -12,8 +16,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -24,19 +33,17 @@ import java.util.UUID;
 @Service
 public class OssServiceImpl implements OssService {
     private static final Logger log = LoggerFactory.getLogger(OssService.class);
-
+    private static final int BUFF_CACHE_SIZE = 1024;
     @Value("${aliyun.oss.file.endpoint}")
     private String endpoint;//地域节点
-
     @Value("${aliyun.oss.file.keyid}")
     private String keyId;//id
-
     @Value("${aliyun.oss.file.keysecret}")
     private String keySecret;//秘钥
-
     @Value("${aliyun.oss.file.bucketname}")
     private String bucketName;//项目名称
-
+    @Value("${aliyun.oss.file.upload-file-path}")
+    private String uploadFilePath;
 
     @Override
     public Result uploadImg(MultipartFile file) {
@@ -62,7 +69,7 @@ public class OssServiceImpl implements OssService {
             fileName = uuid + fileName;
 
             // 文件上传的路径
-            fileName = "upload/images/" + fileName;
+            fileName = uploadFilePath + fileName;
             log.info("文件上传路径: {}", fileName);
 
             //调用oss方法实现上传
@@ -83,6 +90,53 @@ public class OssServiceImpl implements OssService {
     }
 
     /**
+     * 下载阿里云上的文件
+     *
+     * @param fileName
+     */
+    @Override
+    public Result downFile(String fileName, HttpServletResponse response) throws IOException {
+        // 1 拼接完整的文件名 去掉 bucket 的名称
+        String downFileName = uploadFilePath + fileName;
+        // 创建OSSClient实例。
+        OSS ossClient = new OSSClientBuilder().build(endpoint, keyId, keySecret);
+        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+        OutputStream os = response.getOutputStream();
+        InputStream fileIs = null;
+        try {
+            // 3 下载文件
+            // ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。
+            OSSObject ossObject = ossClient.getObject(bucketName, downFileName);
+            ObjectMetadata objectMetadata = ossClient.getObjectMetadata(bucketName, downFileName);
+//            log.info("大小: {}", objectMetadata.getContentLength());
+//            log.info("类型: {}", objectMetadata.getContentType());
+//            log.info("摘要: {}", objectMetadata.getETag());
+            fileIs = ossObject.getObjectContent();
+            log.info("用户下载的文件：{}", ossObject);
+
+            return down(downFileName, response, ossClient, os, fileIs);
+        } catch (OSSException oe) {
+            log.warn("阿里云上无该文件：{}", downFileName);
+            log.error("Error Message: {}", oe.getErrorMessage());
+            log.error("Error Code: {}", oe.getErrorCode());
+            return Result.error(Result.CODE_ERROR_404, "文件不存在");
+        } catch (ClientException ignored) {
+
+        } finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+            if (os != null) {
+                os.close();
+            }
+            if (fileIs != null) {
+                fileIs.close();
+            }
+        }
+        return Result.error(Result.CODE_SYS_ERROR, "下载失败");
+    }
+
+    /**
      * 判断图片类型
      *
      * @param imgType 图片类型
@@ -93,5 +147,31 @@ public class OssServiceImpl implements OssService {
         ArrayList<String> imgTypeList = CollUtil.newArrayList("jpg", "jpeg", "png", "bmp", "tif", "tiff");
 
         return imgTypeList.contains(imgType);
+    }
+
+    private Result down(
+            String downFileName,
+            HttpServletResponse response,
+            OSS ossClient,
+            OutputStream os,
+            InputStream fileIs
+    ) throws IOException {
+        // 2 判断文件是否存在
+        boolean found = ossClient.doesObjectExist(bucketName, downFileName);
+        if (found) {
+
+            byte[] buffer = new byte[BUFF_CACHE_SIZE]; // 创建缓冲区数组
+            int bytesRead = -1; // 用于记录读取的字节数，初始值为-1，表示还没有读取到数据
+
+            BufferedOutputStream buffOs = new BufferedOutputStream(os);
+            while ((bytesRead = fileIs.read(buffer)) != -1) { // 读取数据并写入到文件中，直到读取到文件末尾为止
+                buffOs.write(buffer, 0, bytesRead); // 将数据写入到文件中
+            }
+
+            os.flush();
+        } else {
+            return Result.error(Result.CODE_ERROR_404, "文件不存在");
+        }
+        return Result.success();
     }
 }

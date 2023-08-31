@@ -115,6 +115,7 @@ aliyun:
       keyid: LTAI5tBVPZhygaHirgeJZYGc
       keysecret: jQZBApROc82Cj6yapnbFKF2fiGitHi
       bucketname: sakura-meetu
+      upload-file-path: upload/images/
 logging:
   level:
     com.sakura.meetu: debug
