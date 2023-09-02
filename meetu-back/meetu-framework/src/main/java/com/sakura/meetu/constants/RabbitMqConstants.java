@@ -7,6 +7,14 @@ package com.sakura.meetu.constants;
  * @date 2023/7/5 14:14:11 周三
  */
 public interface RabbitMqConstants {
+
+    String OSS_FILE_EXCHANGE_NAME = "meetu-oss";
+
+    String OSS_FILE_QUEUE_NAME = "meetu-oss-file";
+    String OSS_FILE_ROUTER_KEY = "delete";
+    String OSS_FILE_DEAD_QUEUE_NAME = "meetu-oss-file-dead";
+
+
     /**
      * 邮箱服务交换机名称
      */

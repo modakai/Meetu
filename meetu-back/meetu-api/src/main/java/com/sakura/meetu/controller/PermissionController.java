@@ -1,5 +1,6 @@
 package com.sakura.meetu.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -38,45 +39,53 @@ public class PermissionController {
     }
 
     @PostMapping
+    @SaCheckPermission("permission.add")
     public Result save(@RequestBody Permission permission) {
         permissionService.save(permission);
         return Result.success();
     }
 
     @PutMapping
+    @SaCheckPermission("permission.edit")
     public Result update(@RequestBody PermissionVo permission) {
         permissionService.updateById(permission);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @SaCheckPermission("permission.delete")
     public Result delete(@PathVariable Integer id) {
         permissionService.removeById(id);
         return Result.success();
     }
 
     @PostMapping("/del/batch")
+    @SaCheckPermission("permission.deleteBatch")
     public Result deleteBatch(@RequestBody List<Integer> ids) {
         permissionService.removeByIds(ids);
         return Result.success();
     }
 
     @GetMapping("/tree")
+    @SaCheckPermission("permission.list")
     public Result tree() {
         return permissionService.tree();
     }
 
     @GetMapping
+    @SaCheckPermission("permission.list")
     public Result findAll() {
         return Result.success(permissionService.list());
     }
 
     @GetMapping("/{id}")
+    @SaCheckPermission("permission.list")
     public Result findOne(@PathVariable Integer id) {
         return Result.success(permissionService.getById(id));
     }
 
     @GetMapping("/page")
+    @SaCheckPermission("permission.list")
     public Result findPage(@RequestParam(defaultValue = "") String name,
                            @RequestParam Integer pageNum,
                            @RequestParam Integer pageSize) {
@@ -89,6 +98,7 @@ public class PermissionController {
      * 导出接口
      */
     @GetMapping("/export")
+    @SaCheckPermission("permission.export")
     public void export(HttpServletResponse response) throws Exception {
         // 从数据库查询出所有的数据
         List<Permission> list = permissionService.list();
@@ -116,6 +126,7 @@ public class PermissionController {
      * @throws Exception
      */
     @PostMapping("/import")
+    @SaCheckPermission("permission.import")
     public Result imp(MultipartFile file) throws Exception {
         InputStream inputStream = file.getInputStream();
         ExcelReader reader = ExcelUtil.getReader(inputStream);

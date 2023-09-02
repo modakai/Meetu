@@ -1,5 +1,6 @@
 package com.sakura.meetu.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -37,6 +38,7 @@ public class DictController {
     }
 
     @PostMapping
+    @SaCheckPermission("dict.add")
     public Result save(@RequestBody Dict dict) {
         dictService.save(dict);
         dictService.deleteCache();
@@ -44,6 +46,7 @@ public class DictController {
     }
 
     @PutMapping
+    @SaCheckPermission("dict.edit")
     public Result update(@RequestBody Dict dict) {
         dictService.updateById(dict);
         dictService.deleteCache();
@@ -51,6 +54,7 @@ public class DictController {
     }
 
     @DeleteMapping("/{id}")
+    @SaCheckPermission("dict.delete")
     public Result delete(@PathVariable Integer id) {
         dictService.removeById(id);
         dictService.deleteCache();
@@ -58,6 +62,7 @@ public class DictController {
     }
 
     @PostMapping("/del/batch")
+    @SaCheckPermission("dict.deleteBatch")
     public Result deleteBatch(@RequestBody List<Integer> ids) {
         dictService.removeByIds(ids);
         dictService.deleteCache();
@@ -65,21 +70,25 @@ public class DictController {
     }
 
     @GetMapping
+    @SaCheckPermission("dict.list")
     public Result findAll() {
         return Result.success(dictService.list());
     }
 
     @GetMapping("/{id}")
+    @SaCheckPermission("dict.list")
     public Result findOne(@PathVariable Integer id) {
         return Result.success(dictService.getById(id));
     }
 
     @GetMapping("/type/{type}")
+    @SaCheckPermission("dict.list")
     public Result findDictTypeAll(@PathVariable String type) {
         return dictService.listTypeAll(type);
     }
 
     @GetMapping("/page")
+    @SaCheckPermission("dict.list")
     public Result findPage(@RequestParam(defaultValue = "") String name,
                            @RequestParam Integer pageNum,
                            @RequestParam Integer pageSize) {
@@ -92,6 +101,7 @@ public class DictController {
      * 导出接口
      */
     @GetMapping("/export")
+    @SaCheckPermission("dict.export")
     public void export(HttpServletResponse response) throws Exception {
         // 从数据库查询出所有的数据
         List<Dict> list = dictService.list();
@@ -119,6 +129,7 @@ public class DictController {
      * @throws Exception
      */
     @PostMapping("/import")
+    @SaCheckPermission("dict.import")
     public Result imp(MultipartFile file) throws Exception {
         InputStream inputStream = file.getInputStream();
         ExcelReader reader = ExcelUtil.getReader(inputStream);

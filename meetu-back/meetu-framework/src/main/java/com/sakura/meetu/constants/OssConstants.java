@@ -9,4 +9,6 @@ package com.sakura.meetu.constants;
 public interface OssConstants {
 
     String OSS_AVATAR_FILE_NAME = "avatar/";
+
+    Integer OSS_DELETE_BATCH_MAX_SIZE = 999;
 }

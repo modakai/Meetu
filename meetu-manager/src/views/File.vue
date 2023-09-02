@@ -1,6 +1,6 @@
 <script setup>
 import { nextTick, reactive, ref} from "vue";
-import { delBatch, {lowerEntity}Page,  delOne, saveOrUpdate } from "@/api/{lowerEntity}Api";
+import {delBatch, filePage, delOne, downFileBefore} from "@/api/fileApi";
 import { useUserStore } from "@/stores/user";
 import { ElMessage } from "element-plus";
 
@@ -14,26 +14,20 @@ const data = reactive({
 })
 
 // 对话框
-let dialogFormRef = ref()
 const dialogData = reactive({
   dialogFormVisible: false,
   title: '',
   formData: {}
 })
-// TODO 修改自己修改的地方
-const dialogRules = reactive({
-  username: [
-    { required: true, message: '账号不能为空', trigger: 'blur' },
-  ],
-})
 
 // 加载数据
 const load = () => {
-  {lowerEntity}Page({
+  filePage({
     name: name.value,
     pageNum: pageNum.value,
     pageSize: pageSize.value
   }).then(res => {
+    console.log(res)
     if (res.code === '200') {
       data.table = res.data.records
       total.value = res.data.total
@@ -43,7 +37,7 @@ const load = () => {
 load()
 
 // 搜索用户
-const search{lowerEntity} = () => {
+const searchfile = () => {
   load()
 }
 
@@ -57,12 +51,12 @@ const resetSearch = () => {
 
 // 新增对话框
 const dialogAdd = () => {
-  dialogData.title = '新增{moduleName}'
+  dialogData.title = '新增文件'
   resetDialog({})
 }
 // 编辑用户信息 随便查看详情
 const dialogEdit = (row) => {
-  dialogData.title = '编辑{moduleName}'
+  dialogData.title = '文件详情'
   resetDialog(row)
 }
 // 重置 对话框
@@ -70,7 +64,6 @@ const resetDialog = (data) => {
   dialogData.dialogFormVisible = true
   nextTick(() => {
     dialogData.formData = JSON.parse(JSON.stringify(data))
-    dialogFormRef.value.resetFields()
   })
 }
 // 关闭对话框
@@ -80,8 +73,11 @@ const closeDialog = () => {
 
 // 批量删除
 const idArr = ref([])
+const fileUrlArr = ref([])
 const handleSelectionChange = (selectionData) => {
-  idArr.value = selectionData.map(item => item.id)
+  idArr.value = selectionData.map(file => file.id)
+  console.log(idArr.value)
+  fileUrlArr.value = selectionData.map(item => item.location)
 }
 // 批量删除
 const confirmDelBatch = () => {
@@ -90,7 +86,7 @@ const confirmDelBatch = () => {
     return
   }
 
-  delBatch(idArr.value).then(res => {
+  delBatch({}).then(res => {
     if (res.code === '200') {
       ElMessage.success("批量删除成功")
       load()
@@ -100,43 +96,18 @@ const confirmDelBatch = () => {
   })
 }
 
-const importDataUrl = ref('/api/{lowerEntity}/import')
-const importHeaders = reactive({
-  Authorization: useUserStore().getAuthorization
-})
-const acceptTypes = ref('"application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-// 限制文件上传的裂隙
-const beforeImport = (file) => {
-  let isExcel = file.type === "application/vnd.ms-excel" || file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-  if (!isExcel) {
-    ElMessage.warning("仅仅支持上传Excel类型的文件")
-  }
-  return isExcel;
-}
-// 上传失败
-const importError = (response) => {
-  console.log("导入失败", response)
-}
-// 上传成功
-const importSuccess = (response) => {
-  let code = response.code
-  if (code === '200') {
-    ElMessage.success("导入{moduleName}成功!")
-    load()
-  } else {
-    ElMessage.error(response.msg)
-  }
-}
 
 // 导出数据
 const exportAll = () => {
- window.open("http://localhost:8848/api/{lowerEntity}/export")
+  // TODO 这里肯定是有问题的
+ window.open("http://localhost:8848/api/file/export")
 }
 
 // 删除
 const del = (data) => {
+  console.log({simpleFileId: data.id, simpleFileUrl: data.location})
   // 写接口
-  delOne(data.id).then(res => {
+  delOne({simpleFileId: data.id, simpleFileUrl: data.location}).then(res => {
     if (res.code === '200') {
       ElMessage.success('删除成功')
       load()
@@ -145,21 +116,20 @@ const del = (data) => {
     }
   })
 }
-
-const save = () => {
-  dialogFormRef.value.validate(valid => {   // valid就是校验的结果
-    if (valid) {
-      saveOrUpdate('/{lowerEntity}', dialogData.formData).then(res => {
-        if (res.code === '200') {
-          ElMessage.success('保存成功')
-          dialogData.dialogFormVisible = false
-          load()  // 刷新表格数据
-        } else {
-          ElMessage.error(res.msg)
-        }
-      })
+// 下载文件
+const downFile = (row) => {
+  console.log(row.location)
+  downFileBefore(row.location).then(res => {
+    if (res.code === '200') {
+      // 发送下载请求
+      window.open("http://localhost:8848/api/file/download/file?fileName=" + res.data)
+    } else if (res.code === '404') {
+      ElMessage.warning(res.msg)
+    } else {
+      ElMessage.error(res.msg)
     }
   })
+  // window.open("http://localhost:8848/api/file/download?fileName=" + row.location)
 }
 
 
@@ -169,10 +139,10 @@ const save = () => {
   <div class="home">
 
     <div class="main-search">
-      <el-input v-model="name" placeholder="请输入{moduleName}关键字"/>
+      <el-input v-model="name" placeholder="请输入文件关键字"/>
       <el-button
           type="primary"
-          @click="search{lowerEntity}"
+          @click="searchfile"
       >
         <el-icon style="vertical-align: middle">
           <Search/>
@@ -194,21 +164,9 @@ const save = () => {
     </div>
 
     <div style="margin: 10px 0;">
-          <el-button
-              v-show="data.pageMenus.includes('{lowerEntity}.add')"
-              type="primary"
-              style="color: white"
-              color="#00bd16"
-              @click="dialogAdd"
-          >
-            <el-icon style="vertical-align: middle">
-              <Plus />
-            </el-icon>
-            <span style="vertical-align: middle">新增</span>
-          </el-button>
 
           <el-button
-              v-show="data.pageMenus.includes('{lowerEntity}.export')"
+              v-show="data.pageMenus.includes('file.export')"
               type="primary"
               style="color: white"
               @click="exportAll"
@@ -219,36 +177,14 @@ const save = () => {
             <span style="vertical-align: middle">导出</span>
           </el-button>
 
-          <el-upload
-              v-show="data.pageMenus.includes('{lowerEntity}.import')"
-              class="upload-box"
-              :show-file-list="false"
-              :action="importDataUrl"
-              :accept="acceptTypes"
-              :headers="importHeaders"
-              :before-upload="beforeImport"
-              :on-error="importError"
-              :on-success="importSuccess"
-          >
-            <el-button
-                type="primary"
-                style="color: white"
-            >
-              <el-icon style="vertical-align: middle">
-                <Bottom />
-              </el-icon>
-              <span style="vertical-align: middle">导入</span>
-            </el-button>
-
-          </el-upload>
 
           <!-- 批量删除 -->
           <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
             <template #reference>
               <el-button
-                  v-show="data.pageMenus.includes('{lowerEntity}.deleteBatch')"
+                  v-show="data.pageMenus.includes('file.deleteBatch')"
                   type="danger"
-                  style="color: white"
+                  style="color: white; margin-left: 15px"
               >
                 <el-icon style="vertical-align: middle">
                   <Delete />
@@ -270,23 +206,46 @@ const save = () => {
       >
        <el-table-column type="selection" width="55"/>
 
-{tableBody}
+        <el-table-column prop="id" label="编号"></el-table-column>
+        <el-table-column prop="name" label="文件名"></el-table-column>
+        <el-table-column prop="size" label="大小"></el-table-column>
+        <el-table-column prop="type" label="类型"></el-table-column>
+        <el-table-column
+            prop="url"
+            label="访问链接"
+            show-overflow-tooltip
+        ></el-table-column>
+<!--        <el-table-column prop="md5" label="文件摘要"></el-table-column>-->
+        <el-table-column
+            prop="location"
+            label="存储地址"
+            show-overflow-tooltip
+        ></el-table-column>
 
-       <el-table-column label="操作" width="180">
+
+
+       <el-table-column label="操作" width="240">
          <template #default="scope">
            <el-button
-               v-show="data.pageMenus.includes('{lowerEntity}.edit')"
                type="primary"
                @click="dialogEdit(scope.row)"
            >
-             编辑
+             详情
+           </el-button>
+
+           <el-button
+               color="#5ecf6b"
+               style="color: #ffffff"
+               @click="downFile(scope.row)"
+           >
+             下载
            </el-button>
 
            <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
              <template #reference>
                <el-button
                    type="danger"
-                   v-show="data.pageMenus.includes('{lowerEntity}.delete')"
+                   v-show="data.pageMenus.includes('file.delete')"
                >
                  删除
                </el-button>
@@ -318,29 +277,73 @@ const save = () => {
         :close-on-click-modal="false"
         width="50%"
     >
-      <el-form
-          ref="dialogFormRef"
-          :model="dialogData.formData"
-          :rules="dialogRules"
+      <el-descriptions
+          class="margin-top"
+          title=""
+          :column="3"
           size="large"
-          status-icon
-          label-width="80px"
-          style="padding: 0 20px"
-          @keyup.enter="save"
+          border
       >
-
-{dialog-form}
-
-      </el-form>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">
+              上传时文件名
+            </div>
+          </template>
+          {{ dialogData.formData.name }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">
+              文件大小
+            </div>
+          </template>
+          {{ dialogData.formData.size }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">
+              文件类型
+            </div>
+          </template>
+          {{ dialogData.formData.type }}
+        </el-descriptions-item>
+        <el-descriptions-item :span="3">
+          <template #label>
+            <div class="cell-item">
+              存储地址
+            </div>
+          </template>
+          {{ dialogData.formData.location }}
+        </el-descriptions-item>
+        <el-descriptions-item :span="3">
+          <template #label>
+            <div class="cell-item">
+              访问链接
+            </div>
+          </template>
+          {{ dialogData.formData.url }}
+        </el-descriptions-item>
+        <el-descriptions-item :span="3">
+          <template #label>
+            <div class="cell-item">
+              图片效果
+            </div>
+          </template>
+          <el-image
+              style="width: 100px; height: 100px"
+              :src="dialogData.formData.url"
+              :zoom-rate="1.2"
+              :preview-src-list="[dialogData.formData.url]"
+              :initial-index="0"
+              fit="cover"
+          />
+        </el-descriptions-item>
+      </el-descriptions>
 
       <template #footer>
           <span class="dialog-footer">
             <el-button @click="closeDialog">关闭</el-button>
-            <el-button
-                type="primary" @click="save"
-            >
-              保存
-            </el-button>
           </span>
       </template>
     </el-dialog>

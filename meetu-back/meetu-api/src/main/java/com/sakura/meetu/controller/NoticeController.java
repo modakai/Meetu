@@ -1,5 +1,6 @@
 package com.sakura.meetu.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -39,6 +40,7 @@ public class NoticeController {
     }
 
     @PostMapping
+    @SaCheckPermission("notice.add")
     public Result save(@RequestBody Notice notice) {
         User user = SessionUtils.getUser();
         notice.setUserid(user.getId());
@@ -49,34 +51,40 @@ public class NoticeController {
     }
 
     @PutMapping
+    @SaCheckPermission("notice.edit")
     public Result update(@RequestBody Notice notice) {
         noticeService.updateById(notice);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @SaCheckPermission("notice.delete")
     public Result delete(@PathVariable Integer id) {
         noticeService.removeById(id);
         return Result.success();
     }
 
     @PostMapping("/del/batch")
+    @SaCheckPermission("notice.deleteBatch")
     public Result deleteBatch(@RequestBody List<Integer> ids) {
         noticeService.removeByIds(ids);
         return Result.success();
     }
 
     @GetMapping
+    @SaCheckPermission("notice.list")
     public Result findAll() {
         return Result.success(noticeService.list());
     }
 
     @GetMapping("/{id}")
+    @SaCheckPermission("notice.list")
     public Result findOne(@PathVariable Integer id) {
         return Result.success(noticeService.getById(id));
     }
 
     @GetMapping("/page")
+    @SaCheckPermission("notice.list")
     public Result findPage(@RequestParam(defaultValue = "") String name,
                            @RequestParam Integer pageNum,
                            @RequestParam Integer pageSize) {
@@ -89,6 +97,7 @@ public class NoticeController {
      * 导出接口
      */
     @GetMapping("/export")
+    @SaCheckPermission("notice.export")
     public void export(HttpServletResponse response) throws Exception {
         // 从数据库查询出所有的数据
         List<Notice> list = noticeService.list();
@@ -116,6 +125,7 @@ public class NoticeController {
      * @throws Exception
      */
     @PostMapping("/import")
+    @SaCheckPermission("notice.import")
     public Result imp(MultipartFile file) throws Exception {
         InputStream inputStream = file.getInputStream();
         ExcelReader reader = ExcelUtil.getReader(inputStream);

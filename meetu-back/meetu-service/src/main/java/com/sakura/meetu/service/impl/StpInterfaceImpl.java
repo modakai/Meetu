@@ -10,7 +10,10 @@ import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.IPermissionService;
 import com.sakura.meetu.service.IRoleService;
 import com.sakura.meetu.service.IUserService;
+import com.sakura.meetu.utils.SessionUtils;
 import com.sakura.meetu.vo.PermissionVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -22,6 +25,8 @@ import java.util.stream.Collectors;
  */
 @Component    // 保证此类被 SpringBoot 扫描，完成 Sa-Token 的自定义权限验证扩展
 public class StpInterfaceImpl implements StpInterface {
+
+    private static final Logger log = LoggerFactory.getLogger(StpInterfaceImpl.class);
 
     private final IPermissionService permissionService;
     private final IRoleService roleService;
@@ -38,25 +43,25 @@ public class StpInterfaceImpl implements StpInterface {
      */
     @Override
     public List<String> getPermissionList(Object loginId, String loginType) {
-        // 反查当前登入用户的 信息 TODO 未发现 API
+        // 反查当前登入用户的 信息
         String permissionKey = SaTokenConstant.PERMISSION_USER_KEY + loginId;
         Object obj = getSessionObj(permissionKey);
-        List<PermissionVo> permissions;
+        List<String> permissions;
         if (obj == null) {
-            User user = (User) getSessionObj(SaTokenConstant.CACHE_LOGIN_USER_KEY);
+            User user = SessionUtils.getUser();
             String role = user.getRole();
-            permissions = permissionService.getRolePermissionList(role);
+            permissions =
+                    permissionService.getRolePermissionList(role).stream()
+                            .map(PermissionVo::getAuth)
+                            .filter(StrUtil::isNotBlank)
+                            .collect(Collectors.toList());
+            // 保存缓存
+            setSessionObj(permissionKey, permissions);
         } else {
-            permissions = (List<PermissionVo>) obj;
+            permissions = (List<String>) obj;
         }
 
-        List<String> result = permissions.stream()
-                .map(PermissionVo::getAuth)
-                .filter(StrUtil::isNotBlank)
-                .collect(Collectors.toList());
-        // 保存缓存
-        setSessionObj(permissionKey, result);
-        return result;
+        return permissions;
 
     }
 

@@ -14,4 +14,7 @@ public interface MqMessageService {
      */
     void sendEmailToMQ(String exchangeName, String nodeKey, String email, String emailType);
 
+    void sendFileToMq(String nodeKey, Object message);
+
+
 }

@@ -100,6 +100,7 @@ sa-token:
   token-prefix: Bearer
   # jwt 密钥
   jwt-secret-key: uiournawutojawlkqpoo[]o[31
+  autoRenew: true
   # 在每次创建 Token 时的最高循环次数，用于保证 Token 唯一性
   max-try-times: -1
   # 不打印版本

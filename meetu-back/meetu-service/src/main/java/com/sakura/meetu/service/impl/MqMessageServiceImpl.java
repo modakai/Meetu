@@ -2,11 +2,13 @@ package com.sakura.meetu.service.impl;
 
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.aliyun.oss.OSSException;
 import com.rabbitmq.client.Channel;
 import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.constants.RabbitMqConstants;
 import com.sakura.meetu.constants.RedisKeyConstants;
 import com.sakura.meetu.service.MqMessageService;
+import com.sakura.meetu.service.OssService;
 import com.sakura.meetu.utils.EmailUtils;
 import com.sakura.meetu.utils.RedisUtils;
 import org.slf4j.Logger;
@@ -38,11 +40,13 @@ public class MqMessageServiceImpl implements MqMessageService {
 
     private static final Logger log = LoggerFactory.getLogger(MqMessageServiceImpl.class);
 
+    private final OssService ossService;
     private final RabbitTemplate rabbitTemplate;
     private final EmailUtils emailUtils;
     private final RedisUtils redisUtils;
 
-    public MqMessageServiceImpl(RabbitTemplate rabbitTemplate, EmailUtils emailUtils, RedisUtils redisUtils) {
+    public MqMessageServiceImpl(OssService ossService, RabbitTemplate rabbitTemplate, EmailUtils emailUtils, RedisUtils redisUtils) {
+        this.ossService = ossService;
         this.rabbitTemplate = rabbitTemplate;
         this.emailUtils = emailUtils;
         this.redisUtils = redisUtils;
@@ -72,6 +76,100 @@ public class MqMessageServiceImpl implements MqMessageService {
             log.error("RabbitMq 出现异常", e);
         }
         log.info("消息发送完毕! 消息前往 {} --- {} , 邮箱为: {}, 类型: {}", exchangeName, nodeKey, email, emailType);
+    }
+
+    /**
+     * 发送 消息 给 指定的 消息队列
+     *
+     * @param nodeKey
+     * @param message
+     */
+    @Override
+    public void sendFileToMq(String nodeKey, Object message) {
+        try {
+            // 将数据转换成 Message对象
+            rabbitTemplate.convertAndSend(RabbitMqConstants.OSS_FILE_EXCHANGE_NAME, nodeKey, message);
+        } catch (AmqpException e) {
+            log.error("RabbitMq 出现异常", e);
+        }
+        log.info("消息发送完毕! 消息前往 {} --- {} , 消息为：{}",
+                RabbitMqConstants.OSS_FILE_EXCHANGE_NAME, nodeKey, message.toString());
+    }
+
+    /**
+     * 删除阿里云单个文件的业务
+     *
+     * @param message 文件的url地址
+     * @param channel 连接通道
+     */
+    @RabbitListener(queues = RabbitMqConstants.OSS_FILE_QUEUE_NAME)
+    public void receiveDelFile(Message message, Channel channel) {
+        // message 是 要删除的url地址
+        String fileUrl = new String(message.getBody());
+        log.info("将要删除 OSS 中的文件：{}", fileUrl);
+        MessageProperties properties = message.getMessageProperties();
+        long deliveryTag = properties.getDeliveryTag();
+
+        try {
+            ossService.removeFile(fileUrl);
+            log.info("oss 删除文件成功：{}", fileUrl);
+            channel.basicAck(deliveryTag, false);
+        } catch (IOException e) {
+            log.error("消息出现异常: {}", e.getMessage());
+            try {
+                channel.basicReject(deliveryTag, true);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        } catch (OSSException oe) {
+            log.error("Error Message: {}", oe.getErrorMessage());
+            log.error("Error Code: {}", oe.getErrorCode());
+            try {
+                channel.basicNack(deliveryTag, false, false);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+    }
+
+    @RabbitListener(queues = RabbitMqConstants.OSS_FILE_DEAD_QUEUE_NAME)
+    public void ossFileDelDeadHandler(Message message, Channel channel) {
+        log.info("oss 文件删除死信队列接收到消息：{}", message);
+
+        String fileUrl = new String(message.getBody());
+        MessageProperties properties = message.getMessageProperties();
+        long deliveryTag = properties.getDeliveryTag();
+
+        boolean fileExist = ossService.checkFileExist(fileUrl);
+        if (!fileExist) {
+            // 文件不存在，说明也就删除
+            try {
+                channel.basicAck(deliveryTag, false);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // 文件还存在 则进行删除
+        try {
+            ossService.removeFile(fileUrl);
+            channel.basicAck(deliveryTag, false);
+        } catch (IOException e) {
+            log.error("消息出现异常: {}", e.getMessage());
+            try {
+                channel.basicReject(deliveryTag, true);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        } catch (OSSException oe) {
+            log.error("Error Message: {}", oe.getErrorMessage());
+            log.error("Error Code: {}", oe.getErrorCode());
+            try {
+                channel.basicReject(deliveryTag, true);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     /**
