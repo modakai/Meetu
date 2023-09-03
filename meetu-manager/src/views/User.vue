@@ -15,6 +15,8 @@ const data = reactive({
   pageMenus: useUserStore().getPageMenus(),
   menus: useUserStore().getMenus()
 })
+const loading = ref(true)
+const loadFlag = ref(0)
 
 // 对话框
 let dialogFormRef = ref()
@@ -49,18 +51,26 @@ const load = () => {
     if (res.code === '200') {
       data.table = res.data.records
       total.value = res.data.total
+      checkLoading()
     }
   })
-
 
   // 更新权限
   roleAll().then(res => {
     if (res.code === '200') {
       data.roles = res.data
+      checkLoading()
     }
   })
 }
 load()
+const checkLoading = () => {
+  loadFlag.value = loadFlag.value + 1
+  console.log(loadFlag.value)
+  if (loadFlag.value >= 2) {
+    loading.value = false
+  }
+}
 
 
 // 搜索用户
@@ -284,6 +294,7 @@ const save = () => {
           row-key="id"
           stripe border
           style="width: 100%;"
+          v-loading="loading"
       >
         <el-table-column type="selection" width="55"/>
         <el-table-column prop="username" label="账户" />

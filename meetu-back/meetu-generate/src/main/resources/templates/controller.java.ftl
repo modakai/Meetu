@@ -1,6 +1,6 @@
 package ${package.Controller};
 
-<#--import cn.dev33.satoken.annotation.SaCheckPermission;-->
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -138,7 +138,7 @@ public class ${table.controllerName} {
     * @throws Exception
     */
     @PostMapping("/import")
-<#--    @SaCheckPermission("${table.entityPath}.import")-->
+    @SaCheckPermission("${table.entityPath}.import")
     public Result imp(MultipartFile file) throws Exception {
         InputStream inputStream = file.getInputStream();
         ExcelReader reader = ExcelUtil.getReader(inputStream);

@@ -7,6 +7,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sakura.meetu.config.annotation.AutoLog;
 import com.sakura.meetu.dto.UserDto;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.exception.ServiceException;
@@ -88,6 +89,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "分页查询")
+    @AutoLog("分页获取用户")
     @GetMapping("/page")
     public Result findPage(@RequestParam(defaultValue = "") String username,
                            @RequestParam Integer pageNum,
