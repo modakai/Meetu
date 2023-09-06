@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sakura.meetu.config.LDTConfig;
+import com.sakura.meetu.vo.UserVo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -15,15 +16,15 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 动态表
+ *
  * </p>
  *
  * @author sakura
- * @since 2023-08-28
+ * @since 2023-09-04
  */
 @Getter
 @Setter
-@ApiModel(value = "Dynamic对象", description = "动态表")
+@ApiModel(value = "Dynamic对象", description = "")
 public class Dynamic implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,41 +32,59 @@ public class Dynamic implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    // 发布动态用户的唯一标识
-    @ApiModelProperty("发布动态用户的唯一标识")
-    @Alias("发布动态用户的唯一标识")
-    private String uid;
+    // 软删除
+    @ApiModelProperty("软删除")
+    @Alias("软删除")
+    @TableLogic(value = "0", delval = "id")
+    private Integer deleted;
 
-    // 动态标题
-    @ApiModelProperty("动态标题")
-    @Alias("动态标题")
+    // 名称
+    @ApiModelProperty("名称")
+    @Alias("名称")
     private String name;
 
-    // 动态内容
-    @ApiModelProperty("动态内容")
-    @Alias("动态内容")
+    // 内容
+    @ApiModelProperty("内容")
+    @Alias("内容")
     private String content;
 
     // 图片
     @ApiModelProperty("图片")
     @Alias("图片")
-    private String imgs;
+    private String img;
 
-    // 浏览量
-    @ApiModelProperty("浏览量")
-    @Alias("浏览量")
-    private Integer views;
+    // 用户id
+    @ApiModelProperty("用户id")
+    @Alias("用户id")
+    private Integer userId;
+
+    // 更新时间
+    @ApiModelProperty("更新时间")
+    @Alias("更新时间")
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
+    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
+    private LocalDateTime updateTime;
 
     // 描述
     @ApiModelProperty("描述")
     @Alias("描述")
     private String descr;
 
-    // 软删除
-    @ApiModelProperty("软删除")
-    @Alias("软删除")
-    @TableLogic(value = "0", delval = "id")
-    private Byte deleted;
+    // 浏览量
+    @ApiModelProperty("浏览量")
+    @Alias("浏览量")
+    private Integer view;
+
+    // 话题
+    @ApiModelProperty("话题")
+    @Alias("话题")
+    private String tags;
+
+    // 时间
+    @ApiModelProperty("时间")
+    @Alias("时间")
+    private String time;
 
     // 创建时间
     @ApiModelProperty("创建时间")
@@ -75,11 +94,16 @@ public class Dynamic implements Serializable {
     @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
     private LocalDateTime createTime;
 
-    // 更新时间
-    @ApiModelProperty("更新时间")
-    @Alias("更新时间")
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    @JsonDeserialize(using = LDTConfig.CmzLdtDeSerializer.class)
-    @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
-    private LocalDateTime updateTime;
+
+    @TableField(exist = false)
+    private UserVo user;
+    @TableField(exist = false)  // 数据库不存在这个字段
+    private Boolean hasPraise;
+    @TableField(exist = false)  // 数据库不存在这个字段
+    private Boolean hasCollect;
+    @TableField(exist = false)
+    private Long praiseCount;
+    @TableField(exist = false)
+    private Long collectCount;
+
 }
