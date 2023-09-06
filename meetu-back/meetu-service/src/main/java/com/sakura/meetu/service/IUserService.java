@@ -38,4 +38,6 @@ public interface IUserService extends IService<User> {
     Result removeBatch(List<Integer> ids);
 
     Result listOne(Integer id);
+
+    void updateScore(int i, Integer id);
 }

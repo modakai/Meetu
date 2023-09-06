@@ -308,6 +308,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.success(result);
     }
 
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void updateScore(int score, Integer id) {
+        userMapper.updateUserScore(score, id);
+    }
+
 
     public Result login(User user, String loginType) {
         switch (loginType) {

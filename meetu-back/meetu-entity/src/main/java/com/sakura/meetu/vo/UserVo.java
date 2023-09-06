@@ -57,6 +57,8 @@ public class UserVo implements Serializable {
 
     private String role;
 
+    private Integer score;
+
     private String Authorization;
 
     private List<PermissionVo> menus;

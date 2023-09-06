@@ -93,6 +93,9 @@ public class User implements Serializable {
     @Alias("角色")
     private String role;
 
+    @Alias("积分")
+    private Integer score;
+
     /**
      * 逻辑删除
      */

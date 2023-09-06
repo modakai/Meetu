@@ -22,8 +22,8 @@ const dialogData = reactive({
 })
 // TODO 修改自己修改的地方
 const dialogRules = reactive({
-  username: [
-    { required: true, message: '账号不能为空', trigger: 'blur' },
+  name: [
+    { required: true, message: '请输入动态名称', trigger: 'blur' },
   ],
 })
 
@@ -81,7 +81,7 @@ const closeDialog = () => {
 // 批量删除
 const idArr = ref([])
 const handleSelectionChange = (selectionData) => {
-  idArr.value = selectionData.map(user => user.id)
+  idArr.value = selectionData.map(item => item.id)
 }
 // 批量删除
 const confirmDelBatch = () => {
@@ -130,7 +130,6 @@ const importSuccess = (response) => {
 
 // 导出数据
 const exportAll = () => {
-  // TODO 这里肯定是有问题的
  window.open("http://localhost:8848/api/dynamic/export")
 }
 
@@ -161,6 +160,13 @@ const save = () => {
       })
     }
   })
+}
+
+const content = ref('')
+const viewShow = ref(false)
+const view = (value) => {
+  viewShow.value = true
+  content.value = value
 }
 
 
@@ -209,7 +215,7 @@ const save = () => {
           </el-button>
 
           <el-button
-              v-show="data.pageMenus.includes('dynamic.import')"
+              v-show="data.pageMenus.includes('dynamic.export')"
               type="primary"
               style="color: white"
               @click="exportAll"
@@ -221,7 +227,7 @@ const save = () => {
           </el-button>
 
           <el-upload
-              v-show="data.pageMenus.includes('dynamic.export')"
+              v-show="data.pageMenus.includes('dynamic.import')"
               class="upload-box"
               :show-file-list="false"
               :action="importDataUrl"
@@ -270,15 +276,12 @@ const save = () => {
           style="width: 100%;"
       >
        <el-table-column type="selection" width="55"/>
-
-        <el-table-column prop="content" label="动态内容"></el-table-column>
-        <el-table-column prop="descr" label="描述"></el-table-column>
         <el-table-column prop="id" label="编号"></el-table-column>
-<!--        <el-table-column prop="imgs" label="图片"></el-table-column>-->
-        <el-table-column prop="name" label="动态标题"></el-table-column>
-        <el-table-column prop="uid" label="发布动态用户的唯一标识"></el-table-column>
-        <el-table-column prop="views" label="浏览量"></el-table-column>
-
+        <el-table-column prop="name" label="名称"></el-table-column>
+        <el-table-column label="预览"><template #default="scope"><el-button @click="view(scope.row.content)">查看</el-button></template></el-table-column>
+        <el-table-column label="图片"><template #default="scope"><el-image preview-teleported style="width: 80px; height: 80px" :src="scope.row.img" :preview-src-list="[scope.row.img]"></el-image></template></el-table-column>
+<!--        <el-table-column label="用户"><template #default="scope"><span v-if="scope.row.userId">{{ state.userOptions.find(v => v.id === scope.row.userId) ? state.userOptions.find(v => v.id === scope.row.userId).name : '' }}</span></template></el-table-column>-->
+        <el-table-column prop="time" label="时间"></el-table-column>
 
        <el-table-column label="操作" width="180">
          <template #default="scope">
@@ -337,24 +340,25 @@ const save = () => {
           @keyup.enter="save"
       >
 
-        <el-form-item prop="content" label="动态内容">
+        <el-form-item prop="name" label="名称">
+          <el-input v-model="dialogData.formData.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item prop="content" label="内容">
           <el-input v-model="dialogData.formData.content" autocomplete="off"></el-input>
         </el-form-item>
+
+        <el-form-item prop="img" label="图片">
+          <el-input v-model="dialogData.formData.img" autocomplete="off"></el-input>
+        </el-form-item>
+
         <el-form-item prop="descr" label="描述">
           <el-input v-model="dialogData.formData.descr" autocomplete="off"></el-input>
         </el-form-item>
-<!--        <el-form-item prop="imgs" label="图片">-->
-<!--          <el-input v-model="dialogData.formData.imgs" autocomplete="off"></el-input>-->
-<!--        </el-form-item>-->
-        <el-form-item prop="name" label="动态标题">
-          <el-input v-model="dialogData.formData.name" autocomplete="off"></el-input>
+
+        <el-form-item prop="tags" label="话题">
+          <el-input v-model="dialogData.formData.tags" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item prop="uid" label="发布动态用户的唯一标识">
-          <el-input v-model="dialogData.formData.uid" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item prop="views" label="浏览量">
-          <el-input v-model="dialogData.formData.views" autocomplete="off"></el-input>
-        </el-form-item>
+
 
 
       </el-form>

@@ -3,6 +3,8 @@ package com.sakura.meetu.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sakura.meetu.entity.User;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * <p>
@@ -15,4 +17,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
     User selectOneByUsernameEmail(String username);
+
+    @Update("UPDATE sys_user SET score = score + #{score} WHERE id = #{id}")
+    void updateUserScore(@Param("score") int score, @Param("id") Integer id);
 }
