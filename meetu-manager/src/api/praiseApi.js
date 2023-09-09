@@ -1,8 +1,8 @@
 import requests from "@/api/requests";
 
 // 分页查询
-export const noticePage = (data) => requests({
-    url: '/notice/page',
+export const praisePage = (data) => requests({
+    url: '/praise/page',
     method: 'GET',
     params: {
         name: data.name,
@@ -11,14 +11,9 @@ export const noticePage = (data) => requests({
     }
 })
 
-export const noticeAll = () => requests({
-    url: '/notice',
-    method: 'GET'
-})
-
 // 批量删除用户
 export const delBatch = (data) => requests({
-    url: '/notice/del/batch',
+    url: '/praise/del/batch',
     method: 'POST',
     data: JSON.stringify(data)
 })
@@ -26,7 +21,7 @@ export const delBatch = (data) => requests({
 
 // 删除
 export const delOne = (id) => requests({
-    url: '/notice/' + id,
+    url: '/praise/' + id,
     method: 'DELETE'
 })
 

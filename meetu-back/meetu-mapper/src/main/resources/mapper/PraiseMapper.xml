@@ -2,4 +2,42 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sakura.meetu.mapper.PraiseMapper">
 
+    <resultMap id="vo" type="com.sakura.meetu.vo.PraiseVo">
+        <id column="praiseId" property="id" />
+        <result column="type" property="type"/>
+        <result column="fid" property="fid" />
+        <result column="user_id" property="userId"/>
+        <association property="user" >
+            <result column="user_name" property="name" />
+        </association>
+        <association property="dynamic">
+            <result column="dynamic_name" property="name"/>
+            <result column="dynamic_content" property="content"/>
+        </association>
+    </resultMap>
+
+    <select id="selectAllByUser" resultMap="vo">
+        SELECT
+            praise.id AS 'praiseId',
+            praise.type, praise.fid, praise.user_id,
+            sys_user.`name` AS `user_name`,
+            dynamic.`name`  AS `dynamic_name`,
+            dynamic.content AS `dynamic_content`
+        FROM
+            praise
+                LEFT JOIN sys_user ON praise.user_id = sys_user.id AND sys_user.deleted = 0
+                LEFT JOIN dynamic ON praise.fid = dynamic.id AND dynamic.deleted = 0
+        <where>
+
+            <if test="praiseId != null">
+                AND praise.id = #{praiseId}
+            </if>
+            <if test="username != null and username != ''">
+                AND sys_user.name LIKE #{username} '%'
+            </if>
+            AND praise.deleted = 0
+        </where>
+
+
+    </select>
 </mapper>

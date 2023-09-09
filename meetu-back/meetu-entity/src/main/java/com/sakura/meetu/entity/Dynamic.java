@@ -105,5 +105,10 @@ public class Dynamic implements Serializable {
     private Long praiseCount;
     @TableField(exist = false)
     private Long collectCount;
+    @TableField(exist = false)
+    private Long hot;
+
+    @TableField(exist = false)
+    private Long commentCount;
 
 }

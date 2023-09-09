@@ -47,3 +47,8 @@ export const modifyUser = (data) => requests({
     method: 'put',
     data: JSON.stringify(data)
 })
+
+export const getUserAll = () => requests({
+    url: '/user',
+    method: 'get'
+})

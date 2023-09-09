@@ -3,6 +3,8 @@ package com.sakura.meetu.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sakura.meetu.entity.Dynamic;
 
+import java.util.Map;
+
 /**
  * <p>
  * 服务类
@@ -14,4 +16,6 @@ import com.sakura.meetu.entity.Dynamic;
 public interface IDynamicService extends IService<Dynamic> {
 
     Dynamic findOneById(Integer id);
+
+    Map<String, Object> listPage(String name, String type, Integer pageNum, Integer pageSize);
 }

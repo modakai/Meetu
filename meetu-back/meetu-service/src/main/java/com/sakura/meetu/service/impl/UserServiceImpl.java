@@ -71,6 +71,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         UserServiceImpl currentProxy = (UserServiceImpl) AopContext.currentProxy();
         userDto.setAvatar(Constant.USER_AVATAR_DEFAULT);
         // 防止事务失效
+        userDto.setRole("USER");
         User user = currentProxy.saveUser(userDto);
         if (ObjectUtil.isEmpty(user)) {
             return Result.error(Result.CODE_ERROR_400, "账户或者邮箱已被注册! 如果已忘记密码可以进行找回密码哟!");

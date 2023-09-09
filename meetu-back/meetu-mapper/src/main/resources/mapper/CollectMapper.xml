@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sakura.meetu.mapper.CollectMapper">
+
+    <select id="selectAllByUser" resultType="com.sakura.meetu.vo.CollectVo">
+        SELECT
+            collect.id,
+            collect.dynamic_id, collect.user_id,
+            sys_user.`name` AS `username`,
+            dynamic.`name`  AS `dynamic_name`,
+            dynamic.content AS `content`
+        FROM
+            collect
+                LEFT JOIN sys_user ON collect.user_id = sys_user.id AND sys_user.deleted = 0
+                LEFT JOIN dynamic ON collect.dynamic_id = dynamic.id AND dynamic.deleted = 0
+        <where>
+
+            <if test="userId != null">
+                AND collect.user_id = #{userId}
+            </if>
+            <if test="username != null and username != ''">
+                AND sys_user.name LIKE #{username} '%'
+            </if>
+            AND collect.deleted = 0
+        </where>
+
+    </select>
+</mapper>

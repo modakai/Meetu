@@ -31,8 +31,8 @@ const login = () => {
         if (res.code === '200') {
           let userInfo = res.data
           ElMessage.success(`欢迎 ${userInfo.username} 登入后台管理系统`)
-          useUserStore().setManagerInfo(userInfo)
           router.push("/")
+          useUserStore().setManagerInfo(userInfo)
         } else {
           ElMessage.error(res.msg)
         }

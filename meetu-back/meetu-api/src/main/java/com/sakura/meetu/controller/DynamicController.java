@@ -3,22 +3,23 @@ package com.sakura.meetu.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sakura.meetu.entity.Collect;
 import com.sakura.meetu.entity.Dynamic;
 import com.sakura.meetu.entity.Praise;
 import com.sakura.meetu.entity.User;
+import com.sakura.meetu.service.ICollectService;
 import com.sakura.meetu.service.IDynamicService;
 import com.sakura.meetu.service.IPraiseService;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.utils.SessionUtils;
+import com.sakura.meetu.vo.DynamicVo;
 import com.sakura.meetu.vo.UserVo;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +29,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -46,12 +48,40 @@ public class DynamicController {
     private final IUserService userService;
 
     private final IPraiseService praiseService;
+    private final ICollectService collectService;
 
 
-    public DynamicController(IDynamicService dynamicService, IUserService userService, IPraiseService praiseService) {
+    public DynamicController(IDynamicService dynamicService, IUserService userService, IPraiseService praiseService, ICollectService collectService) {
         this.dynamicService = dynamicService;
         this.userService = userService;
         this.praiseService = praiseService;
+        this.collectService = collectService;
+    }
+
+    /*
+                TODO 动态SQL实现
+                SELECT d.id,
+                       d.name,
+                       d.content,
+                       d.img,
+                       d.view,
+                       COUNT(p.id) * 2 + d.view AS heat_score
+                FROM dynamic d
+                LEFT JOIN praise p ON d.id = p.fid
+                WHERE d.deleted = 0 AND p.deleted = 0
+                GROUP BY d.id, d.name, d.content, d.img, d.view
+             */
+    @GetMapping("/hot")
+    @SaIgnore
+    public Result hot() {
+        List<Dynamic> dynamics = dynamicService.list();
+        List<Praise> praiseList = praiseService.list();
+        for (Dynamic dynamic : dynamics) {
+            long praiseCount = praiseList.stream().filter(p -> p.getFid().equals(dynamic.getId())).count();
+            dynamic.setHot(praiseCount * 2 + dynamic.getView());
+        }
+        dynamics.sort((o1, o2) -> o2.getHot().compareTo(o1.getHot()));
+        return Result.success(dynamics);
     }
 
     @PostMapping
@@ -60,7 +90,12 @@ public class DynamicController {
         User user = SessionUtils.getUser();
         dynamic.setUserId(user.getId());
         dynamic.setTime(DateUtil.now());
-        dynamicService.save(dynamic);
+
+        try {
+            dynamicService.save(dynamic);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateKeyException(e.getMessage());
+        }
 
         // 更新用户的积分
         userService.updateScore(5, user.getId());
@@ -116,15 +151,20 @@ public class DynamicController {
         });
 
         User user = SessionUtils.getUser();
+        
+        if (user != null) {
+            Integer userId = user.getId();
+            // 判断是否点赞
+            Praise praise = praiseService.getOne(new LambdaQueryWrapper<Praise>().eq(Praise::getUserId, userId)
+                    .eq(Praise::getFid, dynamic.getId())
+                    .eq(Praise::getType, "dynamic"));
+            dynamic.setHasPraise(praise != null);
 
-        // TODO 点赞 评论 用户是否点赞 收藏
-        // 动态的点赞数
-
-        // 判断是否点赞
-        Praise praise = praiseService.getOne(new LambdaQueryWrapper<Praise>().eq(Praise::getUserId, user.getId())
-                .eq(Praise::getFid, dynamic.getId())
-                .eq(Praise::getType, "dynamic"));
-        dynamic.setHasPraise(praise != null);
+            // 判断是否收藏
+            List<Collect> collectList = collectService.list(new LambdaQueryWrapper<Collect>().eq(Collect::getUserId, userId));
+            boolean hasCollect = collectList.stream().anyMatch(collect -> collect.getDynamicId().equals(dynamic.getId()));
+            dynamic.setHasCollect(hasCollect);
+        }
 
         return Result.success(dynamic);
     }
@@ -132,21 +172,35 @@ public class DynamicController {
     @GetMapping("/page")
     @SaIgnore
     public Result findPage(@RequestParam(defaultValue = "") String name,
+                           @RequestParam(defaultValue = "") String type,
                            @RequestParam Integer pageNum,
                            @RequestParam Integer pageSize) {
-        QueryWrapper<Dynamic> queryWrapper = new QueryWrapper<Dynamic>().orderByDesc("id");
-        if (StrUtil.isNotBlank(name)) {
-            queryWrapper.like("name", name).or(q -> q.like("descr", name)).or(q -> q.like("tags", name));  // where name like xxx and descr like xxx
+
+        Map<String, Object> map = dynamicService.listPage(name, type, pageNum, pageSize);
+        List<DynamicVo> records = (List<DynamicVo>) map.get("records");
+
+        List<User> userList = userService.list();
+
+        for (DynamicVo record : records) {
+            // 查出用户信息
+            userList.stream().filter(user -> user.getId().equals(record.getUserId())).findFirst().ifPresent(user -> {
+                UserVo userVo = UserVo.builder()
+                        .username(user.getUsername())
+                        .uid(user.getUid())
+                        .avatar(user.getAvatar())
+                        .age(user.getAge())
+                        .name(user.getName())
+                        .gender(user.getGender())
+                        .intro(user.getIntro())
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .score(user.getScore()).build();
+                record.setUser(userVo);
+            });
+
         }
-//        User currentUser = SessionUtils.getUser();  // 获取当前登录的用户信息
-//        if (currentUser != null) {
-//            String role = currentUser.getRole();  // ADMIN   USER   TEACHER
-//            if ("user".equals(type) && "USER".equals(role)) {  // 如果type是user，表示筛选用户自己的数据
-//                queryWrapper.eq("user_id", currentUser.getId());  // select * from  dynamic where user_id = xxx
-//            }
-//        }
-//        Page<Dynamic> page = dynamicService.page(new Page<>(pageNum, pageSize), queryWrapper);
-        return Result.success(dynamicService.page(new Page<>(pageNum, pageSize), queryWrapper));
+
+        return Result.success(map);
     }
 
     /**

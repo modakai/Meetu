@@ -22,7 +22,7 @@ export const useUserStore = defineStore('manager', {
             return this.managerInfo.menus || []
         },
         getPageMenus() {
-            return this.managerInfo.pageMenus.length ? this.managerInfo.pageMenus.map(v => v.auth) : []
+            return this.managerInfo.pageMenus.length ? this.managerInfo.pageMenus.filter(item => item.hide === 0).map(v => v.auth) : []
         },
         getManagerRole() {
             return this.managerInfo.role || ''

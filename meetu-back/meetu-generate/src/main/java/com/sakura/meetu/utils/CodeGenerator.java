@@ -40,11 +40,11 @@ public class CodeGenerator {
     /**
      * 表名
      */
-    private static final String TABLE = "praise";
+    private static final String TABLE = "collect";
     /**
      * 菜单名称
      */
-    private static final String MODULE_NAME = "点赞";
+    private static final String MODULE_NAME = "收藏";
     /**
      * java代码的包名
      */

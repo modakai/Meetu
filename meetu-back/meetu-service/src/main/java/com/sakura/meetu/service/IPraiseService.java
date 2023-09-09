@@ -1,11 +1,13 @@
 package com.sakura.meetu.service;
 
-import com.sakura.meetu.entity.Praise;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sakura.meetu.entity.Praise;
+
+import java.util.Map;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author sakura
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IPraiseService extends IService<Praise> {
 
+    Map<String, Object> listPage(Integer praiseId, String username, Integer pageNum, Integer pageSize);
 }

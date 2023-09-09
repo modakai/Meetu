@@ -74,7 +74,7 @@ const save = () => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .avatar-uploader .avatar {
   width: 120px;
   height: 120px;
