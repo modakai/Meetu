@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sakura.meetu.mapper.CommentsMapper">
+
+    <select id="selectAllByDynamicId" resultType="com.sakura.meetu.entity.Comments">
+        SELECT
+            comments.id, comments.dynamic_id, comments.user_id,
+            comments.content, comments.location, comments.pid,
+            comments.time, comments.puser_id,
+            sys_user.username, sys_user.name, sys_user.avatar
+        FROM
+            comments
+                LEFT JOIN sys_user ON comments.user_id = sys_user.id
+        WHERE
+            comments.dynamic_id = #{dynamicId}
+    </select>
+
+    <select id="selectAllByDynamicName" resultType="com.sakura.meetu.entity.Comments">
+        SELECT
+            comments.id, comments.dynamic_id, comments.user_id,
+            comments.content, comments.location, comments.pid,
+            comments.time, comments.puser_id,
+            sys_user.username, sys_user.name, sys_user.avatar,
+            d.name as dynamicName, d.content as dynamic_content
+        FROM
+            comments
+                LEFT JOIN sys_user ON comments.user_id = sys_user.id
+                LEFT JOIN dynamic d on d.id = comments.dynamic_id
+        <where>
+            <if test="dynamicName != null and dynamicName != ''">
+                d.name LIKE #{dynamicName} '%'
+            </if>
+            AND comments.deleted = 0
+            AND sys_user.deleted = 0
+            AND d.deleted = 0
+        </where>
+
+
+    </select>
+</mapper>

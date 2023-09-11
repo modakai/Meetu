@@ -40,11 +40,11 @@ public class CodeGenerator {
     /**
      * 表名
      */
-    private static final String TABLE = "collect";
+    private static final String TABLE = "comments";
     /**
      * 菜单名称
      */
-    private static final String MODULE_NAME = "收藏";
+    private static final String MODULE_NAME = "评论";
     /**
      * java代码的包名
      */
@@ -124,12 +124,15 @@ public class CodeGenerator {
             }
             // 拿到字段名的 驼峰命名法
             String camelCaseName = StrUtil.toCamelCase(tableColumn.getColumnName());
+
             if (tableColumn.getColumnName().endsWith("img")) {
-                builder.append(SPACE8).append("<el-table-column label=\"图片\">\r\n<template #default=\"scope\">\r\n<el-image preview-teleported style=\"width: 100px; height: 100px\" :src=\"scope.row.").append(camelCaseName).append("\" :preview-src-list=\"[scope.row.img]\"></el-image>\r\n</template>\r\n</el-table-column>\r\n");
+                builder.append(SPACE8).append("<el-table-column label=\"" + tableColumn.getColumnComment() + "\">\r\n<template #default=\"scope\">\r\n<el-image preview-teleported style=\"width: 80px; height: 80px\" :src=\"scope.row.").append(camelCaseName).append("\" :preview-src-list=\"[scope.row.img]\"></el-image>\r\n</template>\r\n</el-table-column>\r\n");
             } else if (tableColumn.getColumnName().endsWith("file")) {
-                builder.append(SPACE8).append("<el-table-column label=\"文件\">\r\n<template #default=\"scope\"> \r\n<a :href=\"scope.row.").append(camelCaseName).append("\" target=\"_blank\" style=\"text-decoration: none; color: dodgerblue\">点击下载</a></template></el-table-column>\r\n");
+                builder.append(SPACE8).append("<el-table-column label=\"" + tableColumn.getColumnComment() + "\"><template #default=\"scope\"> <a :href=\"scope.row.").append(camelCaseName).append("\" target=\"_blank\" style=\"text-decoration: none; color: dodgerblue\">点击下载</a></template></el-table-column>\n");
+            } else if (tableColumn.getColumnName().endsWith("_id")) {  // 选择框显示名称
+                builder.append(SPACE8).append("<el-table-column label=\"" + tableColumn.getColumnComment().replaceAll("id", "") + "\"><template #default=\"scope\"><span v-if=\"scope.row." + camelCaseName + "\">{{ state." + camelCaseName.replaceAll("Id", "") + "Options.find(v => v.id === scope.row." + camelCaseName + ") ? state." + camelCaseName.replaceAll("Id", "") + "Options.find(v => v.id === scope.row." + camelCaseName + ").name : '' }}</span></template></el-table-column>\n");
             } else {
-                builder.append(SPACE8).append("<el-table-column prop=\"").append(camelCaseName).append("\" label=\"").append(tableColumn.getColumnComment()).append("\"></el-table-column>\r\n");
+                builder.append(SPACE8).append("<el-table-column prop=\"").append(camelCaseName).append("\" label=\"").append(tableColumn.getColumnComment()).append("\"></el-table-column>\n");
             }
 
         }

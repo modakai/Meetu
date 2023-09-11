@@ -1,12 +1,8 @@
 import requests from "@/api/requests";
 
-export const dynamicAll = () => requests({
-    url: '/dynamic',
-    method: 'GET'
-})
 // 分页查询
-export const dynamicPage = (data) => requests({
-    url: '/dynamic/page',
+export const commentsPage = (data) => requests({
+    url: '/comments/page',
     method: 'GET',
     params: {
         name: data.name,
@@ -15,9 +11,17 @@ export const dynamicPage = (data) => requests({
     }
 })
 
+export const commentsTree = (dynamicId) => requests({
+    url: '/comments/tree',
+    method: "get",
+    params: {
+        dynamicId: dynamicId
+    }
+})
+
 // 批量删除用户
 export const delBatch = (data) => requests({
-    url: '/dynamic/del/batch',
+    url: '/comments/del/batch',
     method: 'POST',
     data: JSON.stringify(data)
 })
@@ -25,7 +29,7 @@ export const delBatch = (data) => requests({
 
 // 删除
 export const delOne = (id) => requests({
-    url: '/dynamic/' + id,
+    url: '/comments/' + id,
     method: 'DELETE'
 })
 
