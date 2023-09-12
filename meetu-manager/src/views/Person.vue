@@ -20,14 +20,7 @@ const handleImportSuccess = (res) => {
 let $myEmit = defineEmits(['getAvatar'])
 const avatarUploadUrl = ref('/api/file/upload')
 const save = () => {
-  let obj = {
-    a: 1,
-    b: 2,
-    c: 3
-  }
 
-  let newObj = {...obj, b: 20}
-  console.log(newObj)
   modifyUser(state.form).then(res => {
     if (res.code === '200') {
       ElMessage.success('更新成功')

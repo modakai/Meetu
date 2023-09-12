@@ -4,13 +4,16 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.entity.Comments;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.ICommentsService;
+import com.sakura.meetu.service.IMessagesService;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.IpUtils;
 import com.sakura.meetu.utils.Result;
@@ -42,9 +45,12 @@ public class CommentsController {
     private final ICommentsService commentsService;
     private final IUserService userService;
 
-    public CommentsController(ICommentsService commentsService, IUserService userService) {
+    private final IMessagesService messagesService;
+
+    public CommentsController(ICommentsService commentsService, IUserService userService, IMessagesService messagesService) {
         this.commentsService = commentsService;
         this.userService = userService;
+        this.messagesService = messagesService;
     }
 
     @PostMapping
@@ -62,6 +68,10 @@ public class CommentsController {
         // 更新用户积分
         user.setScore(user.getScore() + 2);
         userService.updateById(user);
+
+        ThreadUtil.execute(() -> {
+            messagesService.createMessages(user, comments.getDynamicId(), comments.getUserId(), Constant.OPERATION_COMMENTS);
+        });
 
         return Result.success();
     }

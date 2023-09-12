@@ -14,6 +14,7 @@ const data = reactive({
   table: [],
   pageMenus: useUserStore().getPageMenus(),
 })
+const loading = ref(true)
 
 // 对话框
 let dialogFormRef = ref()
@@ -39,6 +40,7 @@ const load = () => {
     if (res.code === '200') {
       data.table = res.data.records
       total.value = res.data.total
+      loading.value = false
     }
   })
 }
@@ -287,6 +289,7 @@ onBeforeUnmount(() => {
           @selection-change="handleSelectionChange"
           row-key="id"
           stripe border
+          v-loading="loading"
           style="width: 100%;"
       >
        <el-table-column type="selection" width="55"/>
@@ -356,6 +359,7 @@ onBeforeUnmount(() => {
         <el-form-item prop="username" label="收藏人">
           <el-input v-model="dialogData.formData.username" autocomplete="off"></el-input>
         </el-form-item>
+<!--        TODO 待修改-->
         <el-form-item prop="dynamicName" label="动态标题">
           <el-input v-model="dialogData.formData.dynamicName" autocomplete="off"></el-input>
         </el-form-item>

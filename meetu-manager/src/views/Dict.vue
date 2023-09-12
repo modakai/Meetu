@@ -12,6 +12,7 @@ const data = reactive({
   table: [],
   pageMenus: useUserStore().getPageMenus(),
 })
+const loading = ref(true)
 
 // 对话框
 let dialogFormRef = ref()
@@ -20,11 +21,17 @@ const dialogData = reactive({
   title: '',
   formData: {}
 })
-// TODO 修改自己修改的地方
+
 const dialogRules = reactive({
-  username: [
-    { required: true, message: '账号不能为空', trigger: 'blur' },
+  code: [
+    { required: true, message: '编码不能为空', trigger: 'blur' },
   ],
+  content: [
+    { required: true, message: '内容不能为空', trigger: 'blur' },
+  ],
+  type: [
+    { required: true, message: '类型不能为空', trigger: 'blur' },
+  ]
 })
 
 // 加载数据
@@ -37,6 +44,7 @@ const load = () => {
     if (res.code === '200') {
       data.table = res.data.records
       total.value = res.data.total
+      loading.value = false
     }
   })
 }
@@ -270,6 +278,7 @@ const save = () => {
           :data="data.table"
           @selection-change="handleSelectionChange"
           stripe border
+          v-loading="loading"
           style="width: 100%;"
       >
        <el-table-column type="selection" width="55"/>

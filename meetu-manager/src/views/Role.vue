@@ -17,6 +17,7 @@ const data = reactive({
   permissionTable: [],
   pageMenus: useUserStore().getPageMenus(),
 })
+const loading = ref(true)
 
 const permissionTreeRef = ref()
 
@@ -47,6 +48,7 @@ const load = () => {
     if (res.code === '200') {
       data.table = res.data.records
       total.value = res.data.total
+      loading.value = false
     }
   })
 
@@ -266,6 +268,7 @@ const logout = () => {
           @selection-change="handleSelectionChange"
           row-key="id"
           stripe border
+          v-loading="loading"
           style="width: 100%;"
       >
        <el-table-column type="selection" width="55"/>
@@ -337,9 +340,10 @@ const logout = () => {
                ref="permissionTreeRef"
                :data="data.permissionTable"
                show-checkbox
+               check-strictly
+               accordion
                :props="{ label: 'name', value: 'id', children: 'children'}"
                :render-after-expand="false"
-               default-expand-all
                node-key="id"
            />
          </div>

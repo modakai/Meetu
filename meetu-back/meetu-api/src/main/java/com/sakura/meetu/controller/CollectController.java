@@ -1,12 +1,15 @@
 package com.sakura.meetu.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.entity.Collect;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.ICollectService;
+import com.sakura.meetu.service.IMessagesService;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.utils.SessionUtils;
 import org.springframework.dao.DuplicateKeyException;
@@ -34,8 +37,11 @@ public class CollectController {
 
     private final ICollectService collectService;
 
-    public CollectController(ICollectService collectService) {
+    private final IMessagesService messagesService;
+
+    public CollectController(ICollectService collectService, IMessagesService messagesService) {
         this.collectService = collectService;
+        this.messagesService = messagesService;
     }
 
     @PostMapping
@@ -51,6 +57,10 @@ public class CollectController {
         } catch (DuplicateKeyException e) {
             throw new DuplicateKeyException(e.getMessage());
         }
+
+        ThreadUtil.execute(() -> {
+            messagesService.createMessages(user, collect.getDynamicId(), collect.getUserId(), Constant.OPERATION_COLLECT);
+        });
 
         return Result.success();
     }

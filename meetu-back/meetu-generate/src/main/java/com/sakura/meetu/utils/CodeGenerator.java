@@ -40,11 +40,11 @@ public class CodeGenerator {
     /**
      * 表名
      */
-    private static final String TABLE = "tag";
+    private static final String TABLE = "messages";
     /**
      * 菜单名称
      */
-    private static final String MODULE_NAME = "话题";
+    private static final String MODULE_NAME = "消息通知";
     /**
      * java代码的包名
      */

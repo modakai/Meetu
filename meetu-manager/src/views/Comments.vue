@@ -19,6 +19,7 @@ const data = reactive({
   userOptions: [],
 
 })
+const loading = ref(true)
 dynamicAll().then(res => {
   if (res.code === '200') {
     data.dynamicOptions = res.data
@@ -60,6 +61,7 @@ const load = () => {
     if (res.code === '200') {
       data.table = res.data.records
       total.value = res.data.total
+      loading.value = false
     }
   })
 }
@@ -362,6 +364,7 @@ const getSelectCommentsPid = (commentId) => {
           @selection-change="handleSelectionChange"
           row-key="id"
           stripe border
+          v-loading="loading"
           style="width: 100%;"
       >
        <el-table-column type="selection" width="55"/>

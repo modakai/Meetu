@@ -85,7 +85,7 @@ load()
             <span>公告列表</span>
           </div>
         </template>
-        <div v-if="state.notice.length !== 0">
+        <div v-if="state.notice">
           <el-collapse accordion>
           <el-collapse-item v-for="(item,index) in state.notice" :key="item.id" :name="'' + index">
             <template #title>

@@ -6,8 +6,7 @@ import {ElMessage} from "element-plus";
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 import {getUserAll} from "@/api/userApi";
-
-
+import {tagAll} from "@/api/tagApi";
 
 const name = ref('')
 const pageNum = ref(1)
@@ -18,9 +17,15 @@ const data = reactive({
   pageMenus: useUserStore().getPageMenus(),
   userList: [],
   noticeList: [],
+  tagOptions: [],
 })
+const loading = ref(true)
 getUserAll().then(res => data.userList = res.data)
 // noticeAll().then(res => data.noticeList = res.data)
+
+tagAll().then(res => {
+  data.tagOptions = res.data
+})
 
 // 对话框
 let dialogFormRef = ref()
@@ -46,6 +51,7 @@ const load = () => {
     if (res.code === '200') {
       data.table = res.data.records
       total.value = res.data.total
+      loading.value = false
     }
   })
 }
@@ -309,6 +315,7 @@ const handleImportSuccess = (res) => {
           @selection-change="handleSelectionChange"
           row-key="id"
           stripe border
+          v-loading="loading"
           style="width: 100%;"
       >
         <el-table-column type="selection" width="55"/>
@@ -393,6 +400,12 @@ const handleImportSuccess = (res) => {
 
         <el-form-item prop="name" label="名称">
           <el-input v-model="dialogData.formData.name" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item prop="tags" label="话题">
+          <el-select v-model="dialogData.formData.tags" style="width: 100%" multiple>
+            <el-option v-for="item in data.tagOptions" :label="item.name" :key="item.id" :value="item.name"></el-option>
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="descr" label="描述">

@@ -8,6 +8,7 @@ import {dictTypeList} from "@/api/dictApi";
 const data = reactive({
   table: []
 })
+const loading = ref(true)
 // 图标字典集合
 const icons = ref([])
 
@@ -18,11 +19,22 @@ const dialogData = reactive({
   title: '',
   formData: {}
 })
-// TODO 修改自己修改的地方
 const dialogRules = reactive({
-  username: [
-    { required: true, message: '账号不能为空', trigger: 'blur' },
+  name: [
+    { required: true, message: '权限名称不能为空', trigger: 'blur' },
   ],
+  path: [
+    { required: true, message: '访问路径不能为空', trigger: 'blur' },
+  ],
+  page: [
+    { required: true, message: '页码路径不能为空', trigger: 'blur' },
+  ],
+  auth: [
+    { required: true, message: '权限标识不能为空', trigger: 'blur' },
+  ],
+  type: [
+    { required: true, message: '请选择对应的权限类型', trigger: 'blur' },
+  ]
 })
 
 // 加载数据
@@ -30,6 +42,7 @@ const load = () => {
   permissionTree().then(res => {
     if (res.code === '200') {
       data.table = res.data
+      loading.value = false
     }
   })
 
@@ -186,6 +199,7 @@ const changeHide = (row) => {
           stripe border
           row-key="id"
           :tree-props="{ children: 'children' }"
+          v-loading="loading"
           style="width: 100%;"
       >
         <el-table-column type="selection" width="55"/>
@@ -303,7 +317,7 @@ const changeHide = (row) => {
         </el-form-item>
 
         <el-form-item prop="auth" label="权限" v-show="dialogData.formData.type !== 1">
-          <el-input v-model="dialogData.formData.auth" placeholder="请输入权限" autocomplete="off"></el-input>
+          <el-input v-model="dialogData.formData.auth" placeholder="请输入权限; 按 user.add 填写" autocomplete="off"></el-input>
         </el-form-item>
 
 

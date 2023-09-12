@@ -1,11 +1,14 @@
 package com.sakura.meetu.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.entity.Praise;
 import com.sakura.meetu.entity.User;
+import com.sakura.meetu.service.IMessagesService;
 import com.sakura.meetu.service.IPraiseService;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.Result;
@@ -34,10 +37,12 @@ public class PraiseController {
 
     private final IPraiseService praiseService;
     private final IUserService userService;
+    private final IMessagesService messagesService;
 
-    public PraiseController(IPraiseService praiseService, IUserService userService) {
+    public PraiseController(IPraiseService praiseService, IUserService userService, IMessagesService messagesService) {
         this.praiseService = praiseService;
         this.userService = userService;
+        this.messagesService = messagesService;
     }
 
     @PostMapping
@@ -50,6 +55,10 @@ public class PraiseController {
         // 更新用户积分
         user.setScore(user.getScore() + 1);
         userService.updateById(user);
+
+        ThreadUtil.execute(() -> {
+            messagesService.createMessages(user, praise.getFid(), praise.getUserId(), Constant.OPERATION_PRAISE);
+        });
 
         return Result.success();
     }

@@ -7,6 +7,13 @@ package com.sakura.meetu.constants;
  * @create 2023/7/3 21:21:10 周一
  */
 public interface Constant {
+
+    String OPERATION_PRAISE = "点赞";
+
+    String OPERATION_COLLECT = "收藏";
+    String OPERATION_COMMENTS = "评论";
+
+
     /**
      * 默认用户昵称前缀
      */

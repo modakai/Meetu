@@ -14,6 +14,7 @@ const data = reactive({
   table: [],
   pageMenus: useUserStore().getPageMenus(),
 })
+const loading = ref(true)
 
 // 对话框
 const dialogData = reactive({
@@ -245,6 +246,7 @@ const save = () => {
           @selection-change="handleSelectionChange"
           row-key="id"
           stripe border
+          v-loading="loading"
           style="width: 100%;"
       >
        <el-table-column type="selection" width="55"/>

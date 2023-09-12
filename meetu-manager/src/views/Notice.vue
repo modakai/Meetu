@@ -12,7 +12,7 @@ const data = reactive({
   table: [],
   pageMenus: useUserStore().getPageMenus(),
 })
-
+const loading = ref(true)
 // 对话框
 let dialogFormRef = ref()
 const dialogData = reactive({
@@ -24,6 +24,9 @@ const dialogData = reactive({
 const dialogRules = reactive({
   name: [
     { required: true, message: '请输入名称', trigger: 'blur' },
+  ],
+  content: [
+    { required: true, message: '内容不能为空', trigger: 'blur' },
   ]
 })
 // 加载数据
@@ -36,6 +39,7 @@ const load = () => {
     if (res.code === '200') {
       data.table = res.data.records
       total.value = res.data.total
+      loading.value = false
     }
   })
 }
@@ -266,6 +270,7 @@ const save = () => {
           @selection-change="handleSelectionChange"
           row-key="id"
           stripe border
+          v-loading="loading"
           style="width: 100%;"
       >
        <el-table-column type="selection" width="55"/>
@@ -346,7 +351,6 @@ const save = () => {
               autocomplete="off"
           ></el-input>
         </el-form-item>
-
 
       </el-form>
 

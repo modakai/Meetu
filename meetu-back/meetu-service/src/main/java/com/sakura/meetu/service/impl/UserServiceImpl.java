@@ -2,6 +2,7 @@ package com.sakura.meetu.service.impl;
 
 import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -325,7 +326,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 return Result.error(Result.CODE_ERROR_400, "登入类型有误");
         }
 
-
         // 获取用户的权限菜单
         String roleFlag = user.getRole();
         // 获取用户的 水平menus
@@ -337,7 +337,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         StpUtil.login(user.getUid(), loginType);
         SaSession session = StpUtil.getSession();
-        session.set(SaTokenConstant.CACHE_LOGIN_USER_KEY, user);
+        ThreadUtil.execute(() -> {
+            session.set(SaTokenConstant.CACHE_LOGIN_USER_KEY, user);
+        });
+
         String token = StpUtil.getTokenValue();
 
         UserVo result = UserVo.builder()
