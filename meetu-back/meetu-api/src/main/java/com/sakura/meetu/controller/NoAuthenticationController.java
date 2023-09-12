@@ -1,5 +1,6 @@
 package com.sakura.meetu.controller;
 
+import cn.dev33.satoken.annotation.SaIgnore;
 import com.sakura.meetu.dto.UserDto;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.Result;
@@ -34,6 +35,7 @@ public class NoAuthenticationController {
     }
 
     @PostMapping("/api/logout/{uid}")
+    @SaIgnore
     public Result logout(@PathVariable String uid, @RequestParam String thenLoginType) {
         return userService.logout(uid, thenLoginType);
     }

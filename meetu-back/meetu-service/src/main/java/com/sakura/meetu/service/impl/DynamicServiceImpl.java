@@ -10,13 +10,13 @@ import com.sakura.meetu.mapper.DynamicMapper;
 import com.sakura.meetu.service.IDynamicService;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.utils.SessionUtils;
-import com.sakura.meetu.vo.DynamicVo;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -68,7 +68,7 @@ public class DynamicServiceImpl extends ServiceImpl<DynamicMapper, Dynamic> impl
             }
         }
 
-        List<DynamicVo> pendingProcessingData = dynamicMapper.selectALLBYUserIdOrDynamicId(null, userId, name);
+        List<Dynamic> pendingProcessingData = dynamicMapper.selectALLBYUserIdOrDynamicId(null, userId, name);
         pendingProcessingData.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
 
         int total = pendingProcessingData.size();
@@ -76,12 +76,19 @@ public class DynamicServiceImpl extends ServiceImpl<DynamicMapper, Dynamic> impl
         int startIndex = (pageNum - 1) * pageSize;
         int endIndex = Math.min(startIndex + pageSize, total);
 
-        List<DynamicVo> result = pendingProcessingData.subList(startIndex, endIndex);
+        List<Dynamic> result = pendingProcessingData.subList(startIndex, endIndex);
 
         HashMap<String, Object> data = new HashMap<>(8);
         data.put("total", total);
         data.put("records", result);
 
         return data;
+    }
+
+    @Override
+    public List<Dynamic> listHotDynamic() {
+        return dynamicMapper.selectHotAll().stream()
+                .sorted((o1, o2) -> o2.getHot().compareTo(o1.getHot()))
+                .limit(8).collect(Collectors.toList());
     }
 }

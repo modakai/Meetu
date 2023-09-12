@@ -2,12 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sakura.meetu.mapper.DynamicMapper">
 
+    <resultMap id="all" type="com.sakura.meetu.vo.DynamicVo">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId" />
+        <result column="name" property="name" />
+        <result column="content" property="content" />
+        <result column="time" property="time" />
+        <result column="view" property="view" />
+        <result column="descr" property="descr" />
+        <result column="img" property="img" />
+        <result column="tags" property="tags" jdbcType="VARCHAR" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="praise_count" property="praiseCount" />
+        <result column="collect_count" property="collectCount" />
+        <result column="comment_count" property="commentCount" />
+    </resultMap>
+
     <!-- TODO (sakura, 2023/9/9, 15:06, 差 评论数量) -->
-    <select id="selectALLBYUserIdOrDynamicId" resultType="com.sakura.meetu.vo.DynamicVo">
+    <select id="selectALLBYUserIdOrDynamicId" resultMap="all">
         SELECT
             d.id, d.user_id, d.name,
             d.content, d.time, d.view,
-            d.descr, d.img,
+            d.descr, d.img, d.tags,
             COUNT(p.fid) AS praise_count,
             COUNT(c.dynamic_id) AS collect_count,
             COUNT(cm.dynamic_id) AS comment_count
@@ -33,5 +48,90 @@
         </where>
         GROUP BY
             d.id
+        UNION
+        SELECT
+            d.id, d.user_id, d.name,
+            d.content, d.time, d.view,
+            d.descr, d.img,  d.tags,
+            COUNT(p.fid) AS praise_count,
+            COUNT(c.dynamic_id) AS collect_count,
+            COUNT(cm.dynamic_id) AS comment_count
+        FROM
+            dynamic d
+        LEFT JOIN
+            praise p ON d.id = p.fid AND p.deleted = 0
+        LEFT JOIN
+            collect c ON d.id = c.dynamic_id AND c.deleted = 0
+        LEFT JOIN
+            comments cm ON d.id = cm.dynamic_id AND cm.deleted = 0
+        <where>
+            <if test="dynamicId != null">
+                AND d.id = #{dynamicId}
+            </if>
+            <if test="userId != null">
+                AND d.user_id = #{userId}
+            </if>
+            <if test="dynamicName != null">
+                AND d.descr LIKE #{dynamicName} '%'
+            </if>
+            AND d.deleted = 0
+        </where>
+        GROUP BY
+        d.id
+        UNION
+        SELECT
+            d.id, d.user_id, d.name,
+            d.content, d.time, d.view,
+            d.descr, d.img,  d.tags,
+            COUNT(p.fid) AS praise_count,
+            COUNT(c.dynamic_id) AS collect_count,
+            COUNT(cm.dynamic_id) AS comment_count
+        FROM
+            dynamic d
+        LEFT JOIN
+            praise p ON d.id = p.fid AND p.deleted = 0
+        LEFT JOIN
+            collect c ON d.id = c.dynamic_id AND c.deleted = 0
+        LEFT JOIN
+            comments cm ON d.id = cm.dynamic_id AND cm.deleted = 0
+        <where>
+            <if test="dynamicId != null">
+                AND d.id = #{dynamicId}
+            </if>
+            <if test="userId != null">
+                AND d.user_id = #{userId}
+            </if>
+            <if test="dynamicName != null">
+                AND d.tags LIKE #{dynamicName} '%'
+            </if>
+        </where>
+        AND d.deleted = 0
+        GROUP BY
+            d.id
+    </select>
+    <select id="selectHotAll" resultType="com.sakura.meetu.entity.Dynamic">
+        SELECT d.id,
+               d.NAME,
+               d.content,
+               d.img,
+               d.user_id,
+               d.descr,
+               d.VIEW,
+               d.tags,
+               d.time,
+               (IFNULL(p.praise_count, 0) * 2 + IFNULL(d.VIEW, 0) + IFNULL(c.collect_count, 0) * 2 +
+                IFNULL(cm.comment_count, 0) * 3) AS hot
+        FROM dynamic AS d
+                 LEFT JOIN (SELECT fid, COUNT(*) AS praise_count FROM praise WHERE deleted = 0 GROUP BY fid) AS p
+                           ON d.id = p.fid
+                 LEFT JOIN (SELECT dynamic_id, COUNT(*) AS collect_count
+                            FROM collect
+                            WHERE deleted = 0
+                            GROUP BY dynamic_id) AS c ON d.id = c.dynamic_id
+                 LEFT JOIN (SELECT dynamic_id, COUNT(*) AS comment_count
+                            FROM comments
+                            WHERE deleted = 0
+                            GROUP BY dynamic_id) AS cm ON d.id = cm.dynamic_id
+        WHERE d.deleted = 0;
     </select>
 </mapper>

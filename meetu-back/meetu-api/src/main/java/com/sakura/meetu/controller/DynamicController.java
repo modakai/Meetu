@@ -58,30 +58,10 @@ public class DynamicController {
         this.collectService = collectService;
     }
 
-    /*
-                TODO 动态SQL实现
-                SELECT d.id,
-                       d.name,
-                       d.content,
-                       d.img,
-                       d.view,
-                       COUNT(p.id) * 2 + d.view AS heat_score
-                FROM dynamic d
-                LEFT JOIN praise p ON d.id = p.fid
-                WHERE d.deleted = 0 AND p.deleted = 0
-                GROUP BY d.id, d.name, d.content, d.img, d.view
-             */
     @GetMapping("/hot")
     @SaIgnore
     public Result hot() {
-        List<Dynamic> dynamics = dynamicService.list();
-        List<Praise> praiseList = praiseService.list();
-        for (Dynamic dynamic : dynamics) {
-            long praiseCount = praiseList.stream().filter(p -> p.getFid().equals(dynamic.getId())).count();
-            dynamic.setHot(praiseCount * 2 + dynamic.getView());
-        }
-        dynamics.sort((o1, o2) -> o2.getHot().compareTo(o1.getHot()));
-        return Result.success(dynamics);
+        return Result.success(dynamicService.listHotDynamic());
     }
 
     @PostMapping
@@ -151,7 +131,7 @@ public class DynamicController {
         });
 
         User user = SessionUtils.getUser();
-        
+
         if (user != null) {
             Integer userId = user.getId();
             // 判断是否点赞

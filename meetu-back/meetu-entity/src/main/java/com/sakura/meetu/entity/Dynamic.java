@@ -2,6 +2,7 @@ package com.sakura.meetu.entity;
 
 import cn.hutool.core.annotation.Alias;
 import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sakura.meetu.config.LDTConfig;
@@ -13,6 +14,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -79,7 +81,8 @@ public class Dynamic implements Serializable {
     // 话题
     @ApiModelProperty("话题")
     @Alias("话题")
-    private String tags;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<String> tags;
 
     // 时间
     @ApiModelProperty("时间")
