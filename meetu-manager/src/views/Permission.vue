@@ -23,12 +23,6 @@ const dialogRules = reactive({
   name: [
     { required: true, message: '权限名称不能为空', trigger: 'blur' },
   ],
-  path: [
-    { required: true, message: '访问路径不能为空', trigger: 'blur' },
-  ],
-  page: [
-    { required: true, message: '页码路径不能为空', trigger: 'blur' },
-  ],
   auth: [
     { required: true, message: '权限标识不能为空', trigger: 'blur' },
   ],
