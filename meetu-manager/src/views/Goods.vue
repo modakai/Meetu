@@ -1,12 +1,8 @@
 <script setup>
-import {nextTick, onBeforeUnmount, reactive, ref, shallowRef} from "vue";
-import {delBatch, dynamicPage, delOne, saveOrUpdate} from "@/api/dynamicApi";
+import {nextTick, reactive, ref} from "vue";
+import {delBatch, goodsPage, delOne, saveOrUpdate} from "@/api/goodsApi";
 import {useUserStore} from "@/stores/user";
 import {ElMessage} from "element-plus";
-import '@wangeditor/editor/dist/css/style.css' // 引入 css
-import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
-import {getUserAll} from "@/api/userApi";
-import {tagAll} from "@/api/tagApi";
 
 const name = ref('')
 const pageNum = ref(1)
@@ -15,17 +11,8 @@ const total = ref(0)
 const data = reactive({
   table: [],
   pageMenus: useUserStore().getPageMenus(),
-  userList: [],
-  noticeList: [],
-  tagOptions: [],
 })
 const loading = ref(true)
-getUserAll().then(res => data.userList = res.data)
-// noticeAll().then(res => data.noticeList = res.data)
-
-tagAll().then(res => {
-  data.tagOptions = res.data
-})
 
 // 对话框
 let dialogFormRef = ref()
@@ -37,13 +24,34 @@ const dialogData = reactive({
 // TODO 修改自己修改的地方
 const dialogRules = reactive({
   name: [
-    {required: true, message: '请输入动态名称', trigger: 'blur'},
+    {required: true, message: '名称不能为空', trigger: 'blur'},
   ],
+  price: [
+    {required: true, message: '价格不能为空', trigger: 'blur'},
+    { min: 1, max: 4, message: '价格不能超过4位数', trigger: 'blur'},
+    { pattern: /(?:^[1-9]([0-9]+)?(?:\.[0-9]{1,2})?$)|(?:^(?:0){1}$)|(?:^[0-9]\.[0-9](?:[0-9])?$)/, message: "请不要输入负数", trigger: 'change'},
+  ],
+  unit: [
+    {required: true, message: '单位不能为空', trigger: 'blur'},
+  ],
+  num: [
+    {required: true, message: '库存不能为空', trigger: 'blur'},
+    { min: 1, max: 4, message: '不能超过4位数', trigger: 'blur'},
+    { pattern: /(?:^[1-9]([0-9]+)?(?:\.[0-9]{1,2})?$)|(?:^(?:0){1}$)|(?:^[0-9]\.[0-9](?:[0-9])?$)/, message: "请不要输入负数", trigger: 'change'},
+  ],
+  score: [
+    {required: true, message: '所需积分不能为空', trigger: 'blur'},
+    { min: 1, max: 4, message: '价格不能超过4位数', trigger: 'blur'},
+    { pattern: /(?:^[1-9]([0-9]+)?(?:\.[0-9]{1,2})?$)|(?:^(?:0){1}$)|(?:^[0-9]\.[0-9](?:[0-9])?$)/, message: "请不要输入负数", trigger: 'change'},
+  ],
+  statusRadio: [
+    {required: true, message: '必须选择是否上架', trigger: 'blur'},
+  ]
 })
 
 // 加载数据
 const load = () => {
-  dynamicPage({
+  goodsPage({
     name: name.value,
     pageNum: pageNum.value,
     pageSize: pageSize.value
@@ -58,7 +66,7 @@ const load = () => {
 load()
 
 // 搜索用户
-const searchdynamic = () => {
+const searchgoods = () => {
   load()
 }
 
@@ -72,12 +80,12 @@ const resetSearch = () => {
 
 // 新增对话框
 const dialogAdd = () => {
-  dialogData.title = '新增动态'
+  dialogData.title = '新增积分商品'
   resetDialog({})
 }
 // 编辑用户信息 随便查看详情
 const dialogEdit = (row) => {
-  dialogData.title = '编辑动态'
+  dialogData.title = '编辑积分商品'
   resetDialog(row)
 }
 // 重置 对话框
@@ -85,7 +93,6 @@ const resetDialog = (data) => {
   dialogData.dialogFormVisible = true
   nextTick(() => {
     dialogData.formData = JSON.parse(JSON.stringify(data))
-    valueHtml.value = dialogData.formData.content
     dialogFormRef.value.resetFields()
   })
 }
@@ -116,7 +123,7 @@ const confirmDelBatch = () => {
   })
 }
 
-const importDataUrl = ref('/api/dynamic/import')
+const importDataUrl = ref('/api/goods/import')
 const importHeaders = reactive({
   Authorization: useUserStore().getAuthorization
 })
@@ -137,16 +144,22 @@ const importError = (response) => {
 const importSuccess = (response) => {
   let code = response.code
   if (code === '200') {
-    ElMessage.success("导入动态成功!")
+    ElMessage.success("导入积分商品成功!")
     load()
   } else {
     ElMessage.error(response.msg)
   }
 }
+const handleImportSuccess = (res) => {
+
+  dialogData.formData.img = res.data
+  ElMessage.success("上传成功")
+}
+
 
 // 导出数据
 const exportAll = () => {
-  window.open("http://localhost:8848/api/dynamic/export")
+  window.open("http://localhost:8848/api/goods/export")
 }
 
 // 删除
@@ -164,9 +177,8 @@ const del = (data) => {
 
 const save = () => {
   dialogFormRef.value.validate(valid => {   // valid就是校验的结果
-    dialogData.formData.content = valueHtml.value
     if (valid) {
-      saveOrUpdate('/dynamic', dialogData.formData).then(res => {
+      saveOrUpdate('/goods', dialogData.formData).then(res => {
         if (res.code === '200') {
           ElMessage.success('保存成功')
           dialogData.dialogFormVisible = false
@@ -179,37 +191,7 @@ const save = () => {
   })
 }
 
-const content = ref('')
-const viewShow = ref(false)
-const view = (value) => {
-  viewShow.value = true
-  content.value = value
-}
-const valueHtml = ref('')  // 富文本内容
-const editorRef = shallowRef()
-const editorConfig = {
-  placeholder: '请输入内容...',
-  MENU_CONF: {
-    uploadImage: {
-      disabled: true
-    },
 
-  }
-}
-const handleCreated = (editor) => {
-  editorRef.value = editor // 记录 editor 实例，重要！
-}
-onBeforeUnmount(() => {
-  const editor = editorRef.value
-  if (editor == null) return
-  editor.destroy()
-})
-
-const handleImportSuccess = (res) => {
-
-  dialogData.formData.img = res.data
-  ElMessage.success("上传成功")
-}
 
 
 </script>
@@ -218,10 +200,10 @@ const handleImportSuccess = (res) => {
   <div class="home">
 
     <div class="main-search">
-      <el-input v-model="name" placeholder="请输入动态关键字（动态的标题、内容、简介)" style="width: 340px;"/>
+      <el-input v-model="name" placeholder="请输入积分商品关键字"/>
       <el-button
           type="primary"
-          @click="searchdynamic"
+          @click="searchgoods"
       >
         <el-icon style="vertical-align: middle">
           <Search/>
@@ -244,7 +226,7 @@ const handleImportSuccess = (res) => {
 
     <div style="margin: 10px 0;">
       <el-button
-          v-show="data.pageMenus.includes('dynamic.add')"
+          v-show="data.pageMenus.includes('goods.add')"
           type="primary"
           style="color: white"
           color="#00bd16"
@@ -257,7 +239,7 @@ const handleImportSuccess = (res) => {
       </el-button>
 
       <el-button
-          v-show="data.pageMenus.includes('dynamic.export')"
+          v-show="data.pageMenus.includes('goods.export')"
           type="primary"
           style="color: white"
           @click="exportAll"
@@ -269,7 +251,7 @@ const handleImportSuccess = (res) => {
       </el-button>
 
       <el-upload
-          v-show="data.pageMenus.includes('dynamic.import')"
+          v-show="data.pageMenus.includes('goods.import')"
           class="upload-box"
           :show-file-list="false"
           :action="importDataUrl"
@@ -295,7 +277,7 @@ const handleImportSuccess = (res) => {
       <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
         <template #reference>
           <el-button
-              v-show="data.pageMenus.includes('dynamic.deleteBatch')"
+              v-show="data.pageMenus.includes('goods.deleteBatch')"
               type="danger"
               style="color: white"
           >
@@ -319,32 +301,26 @@ const handleImportSuccess = (res) => {
           style="width: 100%;"
       >
         <el-table-column type="selection" width="55"/>
-        <el-table-column prop="id" label="编号"></el-table-column>
+        <el-table-column type="index" width="50" />
+        <el-table-column prop="code" label="编号"></el-table-column>
         <el-table-column prop="name" label="名称"></el-table-column>
-        <el-table-column label="预览">
-          <template #default="scope">
-            <el-button @click="view(scope.row.content)">查看</el-button>
-          </template>
-        </el-table-column>
+        <el-table-column prop="price" label="价格"></el-table-column>
+        <el-table-column prop="unit" label="单位"></el-table-column>
+        <el-table-column prop="num" label="库存"></el-table-column>
+        <el-table-column prop="score" label="所需积分"></el-table-column>
         <el-table-column label="图片">
           <template #default="scope">
             <el-image preview-teleported style="width: 80px; height: 80px" :src="scope.row.img"
                       :preview-src-list="[scope.row.img]"></el-image>
           </template>
         </el-table-column>
-        <el-table-column label="用户">
-          <template #default="scope">
-            <span v-if="scope.row.userId">
-              {{  data.userList.find(v => v.id === scope.row.userId) ? data.userList.find(v => v.id === scope.row.userId).name : '' }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="time" label="时间"></el-table-column>
+        <el-table-column prop="statusRadio" label="是否上架"></el-table-column>
+
 
         <el-table-column label="操作" width="180">
           <template #default="scope">
             <el-button
-                v-show="data.pageMenus.includes('dynamic.edit')"
+                v-show="data.pageMenus.includes('goods.edit')"
                 type="primary"
                 @click="dialogEdit(scope.row)"
             >
@@ -355,7 +331,7 @@ const handleImportSuccess = (res) => {
               <template #reference>
                 <el-button
                     type="danger"
-                    v-show="data.pageMenus.includes('dynamic.delete')"
+                    v-show="data.pageMenus.includes('goods.delete')"
                 >
                   删除
                 </el-button>
@@ -399,19 +375,26 @@ const handleImportSuccess = (res) => {
       >
 
         <el-form-item prop="name" label="名称">
-          <el-input v-model="dialogData.formData.name" autocomplete="off"></el-input>
+          <el-input  v-model="dialogData.formData.name" autocomplete="off"></el-input>
         </el-form-item>
-
-        <el-form-item prop="tags" label="话题">
-          <el-select v-model="dialogData.formData.tags" style="width: 100%" multiple>
-            <el-option v-for="item in data.tagOptions" :label="item.name" :key="item.id" :value="item.name"></el-option>
-          </el-select>
+        <el-form-item prop="price" label="价格">
+          <el-input type="number" v-model="dialogData.formData.price" autocomplete="off" />
         </el-form-item>
-
-        <el-form-item prop="descr" label="描述">
-          <el-input v-model="dialogData.formData.descr" autocomplete="off"></el-input>
+        <el-form-item prop="unit" label="单位">
+          <el-input v-model="dialogData.formData.unit" autocomplete="off"></el-input>
         </el-form-item>
-
+        <el-form-item prop="num" label="库存">
+          <el-input type="number" v-model="dialogData.formData.num" autocomplete="off" />
+        </el-form-item>
+        <el-form-item prop="score" label="所需积分">
+          <el-input  type="number" v-model="dialogData.formData.score" autocomplete="off" />
+        </el-form-item>
+        <el-form-item prop="statusRadio" label="是否上架">
+          <el-radio-group v-model="dialogData.formData.statusRadio">
+            <el-radio label="是">是</el-radio>
+            <el-radio label="否">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item prop="img" label="图片">
           <el-upload
               class="avatar-uploader"
@@ -420,23 +403,11 @@ const handleImportSuccess = (res) => {
               :on-success="handleImportSuccess"
               :headers="{ Authorization: useUserStore().getAuthorization}"
           >
-            <el-image v-if="dialogData.formData.img" preview-teleported :src="dialogData.formData.img" class="avatar" />
+            <img v-if="dialogData.formData.img" :src="dialogData.formData.img" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </el-form-item>
 
-        <Toolbar
-            style="border-bottom: 1px solid #ccc"
-            :editor="editorRef"
-            :mode="'simple'"
-        />
-        <Editor
-            style="height: 300px; overflow-y: hidden;"
-            v-model="valueHtml"
-            :defaultConfig="editorConfig"
-            :mode="'simple'"
-            @onCreated="handleCreated"
-        />
 
       </el-form>
 
@@ -452,18 +423,17 @@ const handleImportSuccess = (res) => {
       </template>
     </el-dialog>
 
-    <el-dialog v-model="viewShow" title="预览" width="60%">
-      <div id="editor-content-view" class="editor-content-view" v-html="content" style="padding: 0 20px"></div>
-      <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="viewShow = false">关闭</el-button>
-      </span>
-      </template>
-    </el-dialog>
-
-
   </div>
 </template>
+
+<style scoped>
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+</style>
+
 
 <style scoped lang="less">
 .home {
@@ -477,22 +447,12 @@ const handleImportSuccess = (res) => {
       margin-left: 10px;
     }
   }
+
   .upload-box {
     display: inline-block;
     position: relative;
     top: 3px;
     margin: 0 12px;
-  }
-
-  /deep/ .el-dialog {
-    .el-dialog__body {
-      .editor-content-view {
-        img {
-          width: 100%;
-        }
-    }
-
-    }
   }
 }
 </style>

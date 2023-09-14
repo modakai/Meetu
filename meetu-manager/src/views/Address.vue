@@ -1,12 +1,9 @@
 <script setup>
-import {nextTick, onBeforeUnmount, reactive, ref, shallowRef} from "vue";
-import {delBatch, dynamicPage, delOne, saveOrUpdate} from "@/api/dynamicApi";
+import {nextTick, reactive, ref} from "vue";
+import {delBatch, addressPage, delOne, saveOrUpdate} from "@/api/addressApi";
 import {useUserStore} from "@/stores/user";
 import {ElMessage} from "element-plus";
-import '@wangeditor/editor/dist/css/style.css' // 引入 css
-import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 import {getUserAll} from "@/api/userApi";
-import {tagAll} from "@/api/tagApi";
 
 const name = ref('')
 const pageNum = ref(1)
@@ -15,35 +12,40 @@ const total = ref(0)
 const data = reactive({
   table: [],
   pageMenus: useUserStore().getPageMenus(),
-  userList: [],
-  noticeList: [],
-  tagOptions: [],
+  userOptions: []
 })
 const loading = ref(true)
-getUserAll().then(res => data.userList = res.data)
-// noticeAll().then(res => data.noticeList = res.data)
-
-tagAll().then(res => {
-  data.tagOptions = res.data
+getUserAll().then(res => {
+  data.userOptions = res.data
 })
-
 // 对话框
 let dialogFormRef = ref()
 const dialogData = reactive({
   dialogFormVisible: false,
   title: '',
-  formData: {}
+  formData: {},
+  disabled: false,
 })
-// TODO 修改自己修改的地方
+
 const dialogRules = reactive({
-  name: [
-    {required: true, message: '请输入动态名称', trigger: 'blur'},
+  address: [
+    {required: true, message: '地址不能为空', trigger: 'blur'},
+  ],
+  userName: [
+    {required: true, message: '收件人不能为空', trigger: 'blur'},
+  ],
+  userId: [
+    {required: true, message: '请选择地址所属用户的id', trigger: 'blur'},
+  ],
+  phone: [
+    {required: true, message: '电话不能为空', trigger: 'blur'},
+    { pattern: /^(?:(?:\+|00)86)?1[3-9]\d{9}$/, message: "请输入正确的手机号", trigger: 'change' }
   ],
 })
 
 // 加载数据
 const load = () => {
-  dynamicPage({
+  addressPage({
     name: name.value,
     pageNum: pageNum.value,
     pageSize: pageSize.value
@@ -58,7 +60,7 @@ const load = () => {
 load()
 
 // 搜索用户
-const searchdynamic = () => {
+const searchaddress = () => {
   load()
 }
 
@@ -72,12 +74,13 @@ const resetSearch = () => {
 
 // 新增对话框
 const dialogAdd = () => {
-  dialogData.title = '新增动态'
+  dialogData.title = '新增地址'
   resetDialog({})
 }
 // 编辑用户信息 随便查看详情
 const dialogEdit = (row) => {
-  dialogData.title = '编辑动态'
+  dialogData.title = '地址详情'
+  dialogData.disabled = true
   resetDialog(row)
 }
 // 重置 对话框
@@ -85,7 +88,6 @@ const resetDialog = (data) => {
   dialogData.dialogFormVisible = true
   nextTick(() => {
     dialogData.formData = JSON.parse(JSON.stringify(data))
-    valueHtml.value = dialogData.formData.content
     dialogFormRef.value.resetFields()
   })
 }
@@ -116,7 +118,7 @@ const confirmDelBatch = () => {
   })
 }
 
-const importDataUrl = ref('/api/dynamic/import')
+const importDataUrl = ref('/api/address/import')
 const importHeaders = reactive({
   Authorization: useUserStore().getAuthorization
 })
@@ -137,7 +139,7 @@ const importError = (response) => {
 const importSuccess = (response) => {
   let code = response.code
   if (code === '200') {
-    ElMessage.success("导入动态成功!")
+    ElMessage.success("导入地址成功!")
     load()
   } else {
     ElMessage.error(response.msg)
@@ -146,7 +148,7 @@ const importSuccess = (response) => {
 
 // 导出数据
 const exportAll = () => {
-  window.open("http://localhost:8848/api/dynamic/export")
+  window.open("http://localhost:8848/api/address/export")
 }
 
 // 删除
@@ -164,9 +166,8 @@ const del = (data) => {
 
 const save = () => {
   dialogFormRef.value.validate(valid => {   // valid就是校验的结果
-    dialogData.formData.content = valueHtml.value
     if (valid) {
-      saveOrUpdate('/dynamic', dialogData.formData).then(res => {
+      saveOrUpdate('/address', dialogData.formData).then(res => {
         if (res.code === '200') {
           ElMessage.success('保存成功')
           dialogData.dialogFormVisible = false
@@ -179,38 +180,6 @@ const save = () => {
   })
 }
 
-const content = ref('')
-const viewShow = ref(false)
-const view = (value) => {
-  viewShow.value = true
-  content.value = value
-}
-const valueHtml = ref('')  // 富文本内容
-const editorRef = shallowRef()
-const editorConfig = {
-  placeholder: '请输入内容...',
-  MENU_CONF: {
-    uploadImage: {
-      disabled: true
-    },
-
-  }
-}
-const handleCreated = (editor) => {
-  editorRef.value = editor // 记录 editor 实例，重要！
-}
-onBeforeUnmount(() => {
-  const editor = editorRef.value
-  if (editor == null) return
-  editor.destroy()
-})
-
-const handleImportSuccess = (res) => {
-
-  dialogData.formData.img = res.data
-  ElMessage.success("上传成功")
-}
-
 
 </script>
 
@@ -218,10 +187,10 @@ const handleImportSuccess = (res) => {
   <div class="home">
 
     <div class="main-search">
-      <el-input v-model="name" placeholder="请输入动态关键字（动态的标题、内容、简介)" style="width: 340px;"/>
+      <el-input v-model="name" placeholder="请输入地址关键字"/>
       <el-button
           type="primary"
-          @click="searchdynamic"
+          @click="searchaddress"
       >
         <el-icon style="vertical-align: middle">
           <Search/>
@@ -244,7 +213,7 @@ const handleImportSuccess = (res) => {
 
     <div style="margin: 10px 0;">
       <el-button
-          v-show="data.pageMenus.includes('dynamic.add')"
+          v-show="data.pageMenus.includes('address.add')"
           type="primary"
           style="color: white"
           color="#00bd16"
@@ -257,7 +226,7 @@ const handleImportSuccess = (res) => {
       </el-button>
 
       <el-button
-          v-show="data.pageMenus.includes('dynamic.export')"
+          v-show="data.pageMenus.includes('address.export')"
           type="primary"
           style="color: white"
           @click="exportAll"
@@ -269,7 +238,7 @@ const handleImportSuccess = (res) => {
       </el-button>
 
       <el-upload
-          v-show="data.pageMenus.includes('dynamic.import')"
+          v-show="data.pageMenus.includes('address.import')"
           class="upload-box"
           :show-file-list="false"
           :action="importDataUrl"
@@ -295,7 +264,7 @@ const handleImportSuccess = (res) => {
       <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
         <template #reference>
           <el-button
-              v-show="data.pageMenus.includes('dynamic.deleteBatch')"
+              v-show="data.pageMenus.includes('address.deleteBatch')"
               type="danger"
               style="color: white"
           >
@@ -319,43 +288,28 @@ const handleImportSuccess = (res) => {
           style="width: 100%;"
       >
         <el-table-column type="selection" width="55"/>
-        <el-table-column prop="id" label="编号"></el-table-column>
-        <el-table-column prop="name" label="名称"></el-table-column>
-        <el-table-column label="预览">
-          <template #default="scope">
-            <el-button @click="view(scope.row.content)">查看</el-button>
-          </template>
-        </el-table-column>
-        <el-table-column label="图片">
-          <template #default="scope">
-            <el-image preview-teleported style="width: 80px; height: 80px" :src="scope.row.img"
-                      :preview-src-list="[scope.row.img]"></el-image>
-          </template>
-        </el-table-column>
-        <el-table-column label="用户">
-          <template #default="scope">
-            <span v-if="scope.row.userId">
-              {{  data.userList.find(v => v.id === scope.row.userId) ? data.userList.find(v => v.id === scope.row.userId).name : '' }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="time" label="时间"></el-table-column>
+
+        <el-table-column type="index" label="编号" width="55"/>
+        <el-table-column prop="address" label="地址"></el-table-column>
+        <el-table-column prop="userName" label="收件人名称"></el-table-column>
+        <el-table-column prop="phone" label="电话"></el-table-column>
+
 
         <el-table-column label="操作" width="180">
           <template #default="scope">
             <el-button
-                v-show="data.pageMenus.includes('dynamic.edit')"
+                v-show="data.pageMenus.includes('address.edit')"
                 type="primary"
                 @click="dialogEdit(scope.row)"
             >
-              编辑
+              详情
             </el-button>
 
             <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
               <template #reference>
                 <el-button
                     type="danger"
-                    v-show="data.pageMenus.includes('dynamic.delete')"
+                    v-show="data.pageMenus.includes('address.delete')"
                 >
                   删除
                 </el-button>
@@ -393,50 +347,26 @@ const handleImportSuccess = (res) => {
           :rules="dialogRules"
           size="large"
           status-icon
-          label-width="80px"
+          :disabled="dialogData.disabled"
+          label-width="110px"
           style="padding: 0 20px"
           @keyup.enter="save"
       >
 
-        <el-form-item prop="name" label="名称">
-          <el-input v-model="dialogData.formData.name" autocomplete="off"></el-input>
+        <el-form-item prop="userName" label="收件人名称">
+          <el-input v-model="dialogData.formData.userName" autocomplete="off" ></el-input>
         </el-form-item>
-
-        <el-form-item prop="tags" label="话题">
-          <el-select v-model="dialogData.formData.tags" style="width: 100%" multiple>
-            <el-option v-for="item in data.tagOptions" :label="item.name" :key="item.id" :value="item.name"></el-option>
+        <el-form-item prop="userId" label="地址所属用户">
+          <el-select clearable v-model="dialogData.formData.userId" placeholder="请选择" style="width: 100%">
+            <el-option v-for="item in data.userOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
-
-        <el-form-item prop="descr" label="描述">
-          <el-input v-model="dialogData.formData.descr" autocomplete="off"></el-input>
+        <el-form-item prop="phone" label="电话">
+          <el-input v-model="dialogData.formData.phone" autocomplete="off"></el-input>
         </el-form-item>
-
-        <el-form-item prop="img" label="图片">
-          <el-upload
-              class="avatar-uploader"
-              :show-file-list="false"
-              :action="'/api/file/upload'"
-              :on-success="handleImportSuccess"
-              :headers="{ Authorization: useUserStore().getAuthorization}"
-          >
-            <el-image v-if="dialogData.formData.img" preview-teleported :src="dialogData.formData.img" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-          </el-upload>
+        <el-form-item prop="address" label="地址">
+          <el-input v-model="dialogData.formData.address" autocomplete="off" ></el-input>
         </el-form-item>
-
-        <Toolbar
-            style="border-bottom: 1px solid #ccc"
-            :editor="editorRef"
-            :mode="'simple'"
-        />
-        <Editor
-            style="height: 300px; overflow-y: hidden;"
-            v-model="valueHtml"
-            :defaultConfig="editorConfig"
-            :mode="'simple'"
-            @onCreated="handleCreated"
-        />
 
       </el-form>
 
@@ -451,16 +381,6 @@ const handleImportSuccess = (res) => {
           </span>
       </template>
     </el-dialog>
-
-    <el-dialog v-model="viewShow" title="预览" width="60%">
-      <div id="editor-content-view" class="editor-content-view" v-html="content" style="padding: 0 20px"></div>
-      <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="viewShow = false">关闭</el-button>
-      </span>
-      </template>
-    </el-dialog>
-
 
   </div>
 </template>
@@ -477,22 +397,12 @@ const handleImportSuccess = (res) => {
       margin-left: 10px;
     }
   }
+
   .upload-box {
     display: inline-block;
     position: relative;
     top: 3px;
     margin: 0 12px;
-  }
-
-  /deep/ .el-dialog {
-    .el-dialog__body {
-      .editor-content-view {
-        img {
-          width: 100%;
-        }
-    }
-
-    }
   }
 }
 </style>

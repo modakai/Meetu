@@ -1,12 +1,11 @@
 <script setup>
 import {nextTick, onBeforeUnmount, reactive, ref, shallowRef} from "vue";
-import {delBatch, dynamicPage, delOne, saveOrUpdate} from "@/api/dynamicApi";
-import {useUserStore} from "@/stores/user";
-import {ElMessage} from "element-plus";
+import { delBatch, messagesPage,  delOne, saveOrUpdate } from "@/api/messagesApi";
+import { useUserStore } from "@/stores/user";
+import { ElMessage } from "element-plus";
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
-import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import {getUserAll} from "@/api/userApi";
-import {tagAll} from "@/api/tagApi";
 
 const name = ref('')
 const pageNum = ref(1)
@@ -15,16 +14,16 @@ const total = ref(0)
 const data = reactive({
   table: [],
   pageMenus: useUserStore().getPageMenus(),
-  userList: [],
-  noticeList: [],
-  tagOptions: [],
+  userOptions: []
 })
 const loading = ref(true)
-getUserAll().then(res => data.userList = res.data)
-// noticeAll().then(res => data.noticeList = res.data)
 
-tagAll().then(res => {
-  data.tagOptions = res.data
+getUserAll().then(res => {
+  if (res.code === '200') {
+
+    data.userOptions = res.data
+    console.log(data.userOptions)
+  }
 })
 
 // 对话框
@@ -36,14 +35,14 @@ const dialogData = reactive({
 })
 // TODO 修改自己修改的地方
 const dialogRules = reactive({
-  name: [
-    {required: true, message: '请输入动态名称', trigger: 'blur'},
+  username: [
+    { required: true, message: '账号不能为空', trigger: 'blur' },
   ],
 })
 
 // 加载数据
 const load = () => {
-  dynamicPage({
+  messagesPage({
     name: name.value,
     pageNum: pageNum.value,
     pageSize: pageSize.value
@@ -58,7 +57,7 @@ const load = () => {
 load()
 
 // 搜索用户
-const searchdynamic = () => {
+const searchmessages = () => {
   load()
 }
 
@@ -72,12 +71,12 @@ const resetSearch = () => {
 
 // 新增对话框
 const dialogAdd = () => {
-  dialogData.title = '新增动态'
+  dialogData.title = '新增消息通知'
   resetDialog({})
 }
 // 编辑用户信息 随便查看详情
 const dialogEdit = (row) => {
-  dialogData.title = '编辑动态'
+  dialogData.title = '编辑消息通知'
   resetDialog(row)
 }
 // 重置 对话框
@@ -116,7 +115,7 @@ const confirmDelBatch = () => {
   })
 }
 
-const importDataUrl = ref('/api/dynamic/import')
+const importDataUrl = ref('/api/messages/import')
 const importHeaders = reactive({
   Authorization: useUserStore().getAuthorization
 })
@@ -137,7 +136,7 @@ const importError = (response) => {
 const importSuccess = (response) => {
   let code = response.code
   if (code === '200') {
-    ElMessage.success("导入动态成功!")
+    ElMessage.success("导入消息通知成功!")
     load()
   } else {
     ElMessage.error(response.msg)
@@ -146,7 +145,7 @@ const importSuccess = (response) => {
 
 // 导出数据
 const exportAll = () => {
-  window.open("http://localhost:8848/api/dynamic/export")
+ window.open("http://localhost:8848/api/messages/export")
 }
 
 // 删除
@@ -166,7 +165,7 @@ const save = () => {
   dialogFormRef.value.validate(valid => {   // valid就是校验的结果
     dialogData.formData.content = valueHtml.value
     if (valid) {
-      saveOrUpdate('/dynamic', dialogData.formData).then(res => {
+      saveOrUpdate('/messages', dialogData.formData).then(res => {
         if (res.code === '200') {
           ElMessage.success('保存成功')
           dialogData.dialogFormVisible = false
@@ -199,18 +198,12 @@ const editorConfig = {
 const handleCreated = (editor) => {
   editorRef.value = editor // 记录 editor 实例，重要！
 }
+// 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
   const editor = editorRef.value
   if (editor == null) return
   editor.destroy()
 })
-
-const handleImportSuccess = (res) => {
-
-  dialogData.formData.img = res.data
-  ElMessage.success("上传成功")
-}
-
 
 </script>
 
@@ -218,10 +211,10 @@ const handleImportSuccess = (res) => {
   <div class="home">
 
     <div class="main-search">
-      <el-input v-model="name" placeholder="请输入动态关键字（动态的标题、内容、简介)" style="width: 340px;"/>
+      <el-input v-model="name" placeholder="请输入消息通知关键字"/>
       <el-button
           type="primary"
-          @click="searchdynamic"
+          @click="searchmessages"
       >
         <el-icon style="vertical-align: middle">
           <Search/>
@@ -243,70 +236,70 @@ const handleImportSuccess = (res) => {
     </div>
 
     <div style="margin: 10px 0;">
-      <el-button
-          v-show="data.pageMenus.includes('dynamic.add')"
-          type="primary"
-          style="color: white"
-          color="#00bd16"
-          @click="dialogAdd"
-      >
-        <el-icon style="vertical-align: middle">
-          <Plus/>
-        </el-icon>
-        <span style="vertical-align: middle">新增</span>
-      </el-button>
-
-      <el-button
-          v-show="data.pageMenus.includes('dynamic.export')"
-          type="primary"
-          style="color: white"
-          @click="exportAll"
-      >
-        <el-icon style="vertical-align: middle">
-          <Top/>
-        </el-icon>
-        <span style="vertical-align: middle">导出</span>
-      </el-button>
-
-      <el-upload
-          v-show="data.pageMenus.includes('dynamic.import')"
-          class="upload-box"
-          :show-file-list="false"
-          :action="importDataUrl"
-          :accept="acceptTypes"
-          :headers="importHeaders"
-          :before-upload="beforeImport"
-          :on-error="importError"
-          :on-success="importSuccess"
-      >
-        <el-button
-            type="primary"
-            style="color: white"
-        >
-          <el-icon style="vertical-align: middle">
-            <Bottom/>
-          </el-icon>
-          <span style="vertical-align: middle">导入</span>
-        </el-button>
-
-      </el-upload>
-
-      <!-- 批量删除 -->
-      <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
-        <template #reference>
           <el-button
-              v-show="data.pageMenus.includes('dynamic.deleteBatch')"
-              type="danger"
+              v-show="data.pageMenus.includes('messages.add')"
+              type="primary"
               style="color: white"
+              color="#00bd16"
+              @click="dialogAdd"
           >
             <el-icon style="vertical-align: middle">
-              <Delete/>
+              <Plus />
             </el-icon>
-            <span style="vertical-align: middle">批量删除</span>
+            <span style="vertical-align: middle">新增</span>
           </el-button>
-        </template>
-      </el-popconfirm>
-    </div>
+
+          <el-button
+              v-show="data.pageMenus.includes('messages.export')"
+              type="primary"
+              style="color: white"
+              @click="exportAll"
+          >
+            <el-icon style="vertical-align: middle">
+              <Top />
+            </el-icon>
+            <span style="vertical-align: middle">导出</span>
+          </el-button>
+
+          <el-upload
+              v-show="data.pageMenus.includes('messages.import')"
+              class="upload-box"
+              :show-file-list="false"
+              :action="importDataUrl"
+              :accept="acceptTypes"
+              :headers="importHeaders"
+              :before-upload="beforeImport"
+              :on-error="importError"
+              :on-success="importSuccess"
+          >
+            <el-button
+                type="primary"
+                style="color: white"
+            >
+              <el-icon style="vertical-align: middle">
+                <Bottom />
+              </el-icon>
+              <span style="vertical-align: middle">导入</span>
+            </el-button>
+
+          </el-upload>
+
+          <!-- 批量删除 -->
+          <el-popconfirm title="您确定要执行此操作吗？" @confirm="confirmDelBatch">
+            <template #reference>
+              <el-button
+                  v-show="data.pageMenus.includes('messages.deleteBatch')"
+                  type="danger"
+                  style="color: white"
+              >
+                <el-icon style="vertical-align: middle">
+                  <Delete />
+                </el-icon>
+                <span style="vertical-align: middle">批量删除</span>
+              </el-button>
+            </template>
+          </el-popconfirm>
+        </div>
 
     <!-- 表格 -->
     <div style="margin: 20px 0">
@@ -318,65 +311,56 @@ const handleImportSuccess = (res) => {
           v-loading="loading"
           style="width: 100%;"
       >
-        <el-table-column type="selection" width="55"/>
+       <el-table-column type="selection" width="55"/>
+
         <el-table-column prop="id" label="编号"></el-table-column>
-        <el-table-column prop="name" label="名称"></el-table-column>
-        <el-table-column label="预览">
-          <template #default="scope">
-            <el-button @click="view(scope.row.content)">查看</el-button>
-          </template>
-        </el-table-column>
-        <el-table-column label="图片">
-          <template #default="scope">
-            <el-image preview-teleported style="width: 80px; height: 80px" :src="scope.row.img"
-                      :preview-src-list="[scope.row.img]"></el-image>
-          </template>
-        </el-table-column>
-        <el-table-column label="用户">
+        <el-table-column label="预览"><template #default="scope"><el-button @click="view(scope.row.content)">查看</el-button></template></el-table-column>
+        <el-table-column prop="isread" label="是否已读"></el-table-column>
+        <el-table-column prop="time" label="通知时间"></el-table-column>
+        <el-table-column label="通知人">
           <template #default="scope">
             <span v-if="scope.row.userId">
-              {{  data.userList.find(v => v.id === scope.row.userId) ? data.userList.find(v => v.id === scope.row.userId).name : '' }}
+              {{ data.userOptions.find(v => v.id === scope.row.userId) ? data.userOptions.find(v => v.id === scope.row.userId).name : '' }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="time" label="时间"></el-table-column>
 
-        <el-table-column label="操作" width="180">
-          <template #default="scope">
-            <el-button
-                v-show="data.pageMenus.includes('dynamic.edit')"
-                type="primary"
-                @click="dialogEdit(scope.row)"
-            >
-              编辑
-            </el-button>
+       <el-table-column label="操作" width="180">
+         <template #default="scope">
+           <el-button
+               v-show="data.pageMenus.includes('messages.edit')"
+               type="primary"
+               @click="dialogEdit(scope.row)"
+           >
+             编辑
+           </el-button>
 
-            <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
-              <template #reference>
-                <el-button
-                    type="danger"
-                    v-show="data.pageMenus.includes('dynamic.delete')"
-                >
-                  删除
-                </el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
+           <el-popconfirm title="您确定要删除吗？" @confirm="del(scope.row)">
+             <template #reference>
+               <el-button
+                   type="danger"
+                   v-show="data.pageMenus.includes('messages.delete')"
+               >
+                 删除
+               </el-button>
+             </template>
+           </el-popconfirm>
+         </template>
+       </el-table-column>
       </el-table>
     </div>
 
     <!--  分页导航   -->
     <div style="margin: 10px 0">
       <el-pagination
-          @current-change="load"
-          @size-change="load"
-          v-model:current-page="pageNum"
-          v-model:page-size="pageSize"
-          background
-          :page-sizes="[1, 5, 10, 20]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
+        @current-change="load"
+        @size-change="load"
+        v-model:current-page="pageNum"
+        v-model:page-size="pageSize"
+        background
+        :page-sizes="[1, 5, 10, 20]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
       />
     </div>
 
@@ -398,31 +382,20 @@ const handleImportSuccess = (res) => {
           @keyup.enter="save"
       >
 
-        <el-form-item prop="name" label="名称">
-          <el-input v-model="dialogData.formData.name" autocomplete="off"></el-input>
-        </el-form-item>
-
-        <el-form-item prop="tags" label="话题">
-          <el-select v-model="dialogData.formData.tags" style="width: 100%" multiple>
-            <el-option v-for="item in data.tagOptions" :label="item.name" :key="item.id" :value="item.name"></el-option>
+        <el-form-item prop="userId" label="通知人">
+          <el-select clearable v-model="dialogData.formData.userId" placeholder="请选择"  style="width: 100%">
+            <el-option v-for="item in data.userOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
-
-        <el-form-item prop="descr" label="描述">
-          <el-input v-model="dialogData.formData.descr" autocomplete="off"></el-input>
+        <el-form-item prop="time" label="通知时间">
+          <el-date-picker style="width: 100%" v-model="dialogData.formData.time" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="选择日期时间"></el-date-picker>
         </el-form-item>
+        <el-form-item prop="isread" label="是否已读">
 
-        <el-form-item prop="img" label="图片">
-          <el-upload
-              class="avatar-uploader"
-              :show-file-list="false"
-              :action="'/api/file/upload'"
-              :on-success="handleImportSuccess"
-              :headers="{ Authorization: useUserStore().getAuthorization}"
-          >
-            <el-image v-if="dialogData.formData.img" preview-teleported :src="dialogData.formData.img" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-          </el-upload>
+          <el-radio-group v-model="dialogData.formData.isread">
+            <el-radio :label="0" size="large" border>未读</el-radio>
+            <el-radio :label="1" size="large" border>已读</el-radio>
+          </el-radio-group>
         </el-form-item>
 
         <Toolbar
@@ -437,7 +410,6 @@ const handleImportSuccess = (res) => {
             :mode="'simple'"
             @onCreated="handleCreated"
         />
-
       </el-form>
 
       <template #footer>
@@ -452,15 +424,14 @@ const handleImportSuccess = (res) => {
       </template>
     </el-dialog>
 
-    <el-dialog v-model="viewShow" title="预览" width="60%">
-      <div id="editor-content-view" class="editor-content-view" v-html="content" style="padding: 0 20px"></div>
+    <el-dialog v-model="viewShow" title="预览" width="40%">
+      <div  id="editor-content-view" class="editor-content-view" v-html="content" style="padding: 0 20px"></div>
       <template #footer>
       <span class="dialog-footer">
         <el-button @click="viewShow = false">关闭</el-button>
       </span>
       </template>
     </el-dialog>
-
 
   </div>
 </template>
@@ -477,22 +448,12 @@ const handleImportSuccess = (res) => {
       margin-left: 10px;
     }
   }
+
   .upload-box {
     display: inline-block;
     position: relative;
     top: 3px;
     margin: 0 12px;
-  }
-
-  /deep/ .el-dialog {
-    .el-dialog__body {
-      .editor-content-view {
-        img {
-          width: 100%;
-        }
-    }
-
-    }
   }
 }
 </style>

@@ -23,9 +23,6 @@ const dialogRules = reactive({
   name: [
     { required: true, message: '权限名称不能为空', trigger: 'blur' },
   ],
-  auth: [
-    { required: true, message: '权限标识不能为空', trigger: 'blur' },
-  ],
   type: [
     { required: true, message: '请选择对应的权限类型', trigger: 'blur' },
   ]
@@ -272,7 +269,7 @@ const changeHide = (row) => {
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item prop="pid" label="父级">
+        <el-form-item prop="pid" label="父级" v-show="dialogData.formData.type !== 1">
           <el-tree-select
               style="width: 100%" v-model="dialogData.formData.pid" :data="data.table"
               @node-click="handleNodeClick"
