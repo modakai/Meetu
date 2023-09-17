@@ -27,6 +27,7 @@ import java.util.List;
 @Getter
 @Setter
 @ApiModel(value = "Dynamic对象", description = "")
+@TableName(value = "dynamic", autoResultMap = true)
 public class Dynamic implements Serializable {
 
     private static final long serialVersionUID = 1L;

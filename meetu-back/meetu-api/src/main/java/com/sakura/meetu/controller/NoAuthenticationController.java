@@ -2,6 +2,8 @@ package com.sakura.meetu.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
 import com.sakura.meetu.dto.UserDto;
+import com.sakura.meetu.service.IDataAnalysisService;
+import com.sakura.meetu.service.IDynamicService;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.validation.EmailLoginGroup;
@@ -24,15 +26,31 @@ public class NoAuthenticationController {
 
     private final IUserService userService;
 
-    public NoAuthenticationController(IUserService userService) {
+    private final IDataAnalysisService dataAnalysisService;
+
+    private final IDynamicService dynamicService;
+
+    public NoAuthenticationController(IUserService userService, IDataAnalysisService dataAnalysisService, IDynamicService dynamicService) {
         this.userService = userService;
+        this.dataAnalysisService = dataAnalysisService;
+        this.dynamicService = dynamicService;
     }
 
-
-    @GetMapping("/api/testLogin")
-    public String testLogin() {
-        return "success";
+    @GetMapping("/api/data/analysis/sys")
+    public Result sysDataAnalysis() {
+        return dataAnalysisService.listSysAnalysis();
     }
+
+    @GetMapping("/api/echarts/dynamicTag")
+    public Result echartsDynamicTag() {
+        return Result.success(dynamicService.echartsDynamicTag());
+    }
+
+    @GetMapping("/api/echarts/dynamicCount")
+    public Result dynamicCount() {
+        return Result.success(dynamicService.echartsDynamicCount());
+    }
+
 
     @PostMapping("/api/logout/{uid}")
     @SaIgnore
@@ -63,8 +81,4 @@ public class NoAuthenticationController {
         return userService.register(userDto);
     }
 
-    @GetMapping("/active")
-    public Result active() {
-        return Result.success(userService.list());
-    }
 }

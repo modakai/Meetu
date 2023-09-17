@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sakura.meetu.entity.Dynamic;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -25,4 +27,16 @@ public interface DynamicMapper extends BaseMapper<Dynamic> {
     );
 
     List<Dynamic> selectHotAll();
+
+    @Select("SELECT " +
+            " DATE( dynamic.time ) AS `name`, " +
+            " COUNT(*) AS `value` " +
+            " FROM " +
+            " dynamic " +
+            " WHERE " +
+            " deleted = 0 " +
+            "GROUP BY " +
+            " DATE( dynamic.time ); ")
+    List<Map<String, Long>> analysisDynamic();
+
 }

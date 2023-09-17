@@ -1,5 +1,7 @@
 package com.sakura.meetu.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.thread.ThreadUtil;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,9 +15,7 @@ import com.sakura.meetu.utils.SessionUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +33,24 @@ public class DynamicServiceImpl extends ServiceImpl<DynamicMapper, Dynamic> impl
 
     public DynamicServiceImpl(DynamicMapper dynamicMapper) {
         this.dynamicMapper = dynamicMapper;
+    }
+
+    @Override
+    public List<Dict> echartsDynamicTag() {
+        List<Dict> list = CollUtil.newArrayList();
+        List<Dynamic> dynamics = dynamicMapper.selectList(null);
+        Set<String> tagsSet = new HashSet<>();
+        dynamics.stream().map(Dynamic::getTags).forEach(tagsList -> {
+            if (tagsList != null) {
+                tagsSet.addAll(tagsList);
+            }
+        });
+        for (String tag : tagsSet) {
+            Dict dict = Dict.create();
+            dict.set("name", tag).set("value", dynamics.stream().filter(dynamic -> dynamic.getTags() != null && dynamic.getTags().contains(tag)).count());
+            list.add(dict);
+        }
+        return list;
     }
 
     @Override
@@ -90,5 +108,17 @@ public class DynamicServiceImpl extends ServiceImpl<DynamicMapper, Dynamic> impl
         return dynamicMapper.selectHotAll().stream()
                 .sorted((o1, o2) -> o2.getHot().compareTo(o1.getHot()))
                 .limit(8).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Dict> echartsDynamicCount() {
+        List<Dict> list = CollUtil.newArrayList();
+        List<Map<String, Long>> dynamicCountData = dynamicMapper.analysisDynamic();
+        for (Map<String, Long> data : dynamicCountData) {
+            Dict dict = Dict.create();
+            dict.set("name", data.get("name")).set("value", data.get("value"));
+            list.add(dict);
+        }
+        return list.stream().sorted(Comparator.comparing(dict -> dict.getStr("name"))).collect(Collectors.toList());
     }
 }
