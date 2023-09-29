@@ -91,7 +91,8 @@ public class WebSocketServer {
             return;
         }
 
-        Im im = Im.builder().uid(uid).text(message).build();
+        Im im = new Im();
+        im.setUid(uid).setText(message);
 
         // 存储数据到数据库
         staticImService.save(im);

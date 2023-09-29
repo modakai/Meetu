@@ -52,9 +52,9 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments> i
         for (Comments comment : level1) {
             List<Comments> level2 = commentMap.getOrDefault(comment.getId(), new ArrayList<>());
 
-            for (Comments level2Comments : level2) {
-                level2Comments.setPName(comment.getName());
-            }
+//            for (Comments level2Comments : level2) {
+//                level2Comments.setPName(comment.getName());
+//            }
 
             comment.setChildren(level2);
         }

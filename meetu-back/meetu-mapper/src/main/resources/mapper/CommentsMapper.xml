@@ -7,10 +7,11 @@
             comments.id, comments.dynamic_id, comments.user_id,
             comments.content, comments.location, comments.pid,
             comments.time, comments.puser_id,
-            sys_user.username, sys_user.name, sys_user.avatar
+            su.username, su.name, su.avatar, psu.name as 'pUserName'
         FROM
             comments
-                LEFT JOIN sys_user ON comments.user_id = sys_user.id
+                LEFT JOIN sys_user su ON comments.user_id = su.id
+                LEFT JOIN sys_user psu ON comments.puser_id = psu.id
         WHERE
             comments.dynamic_id = #{dynamicId}
     </select>

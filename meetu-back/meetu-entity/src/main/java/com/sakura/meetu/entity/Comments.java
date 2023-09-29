@@ -99,7 +99,7 @@ public class Comments implements Serializable {
     @TableField(exist = false)
     private String avatar;
     @TableField(exist = false)
-    private String pName;
+    private String pUserName;
     @TableField(exist = false)
     private String dynamicName;
     @TableField(exist = false)

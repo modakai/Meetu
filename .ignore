@@ -16,7 +16,7 @@
 *.zip
 *.tar.gz
 *.rar
-*.yml
+**.yml
 
 hs_err_pid*
 

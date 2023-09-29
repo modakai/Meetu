@@ -101,6 +101,25 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
     @Transactional(rollbackFor = RuntimeException.class)
     public Result removeFileBatch(FileDto fileDto) {
         List<Integer> fileIds = fileDto.getFileIds();
+        if (fileIds == null || fileIds.size() == 0)
+            return Result.error(Result.CODE_ERROR_400, "请选择数据");
+
+        List<File> files = listByIds(fileIds);
+
+        removeBatchByIds(fileIds);
+        // 删除本地
+        for (File file : files) {
+            java.io.File location = new java.io.File(file.getLocation());
+            if (location.exists()) {
+                location.delete();
+            }
+        }
+
+        return Result.success();
+    }
+
+    private Result removeFileOss(FileDto fileDto) {
+        List<Integer> fileIds = fileDto.getFileIds();
         List<String> fileUrls = fileDto.getFileUrls();
         if (fileIds == null || fileUrls == null) {
             return Result.error(Result.CODE_ERROR_400, "请选择数据");

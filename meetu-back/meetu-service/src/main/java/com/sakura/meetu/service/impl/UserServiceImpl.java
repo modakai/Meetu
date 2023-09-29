@@ -167,7 +167,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         GenderEnum.getValue(userDto.getGender())
                 .orElseThrow(() -> new ServiceException("性别类型传递错误"));
 
+        User loginUser = SessionUtils.getUser();
+        if (loginUser == null) {
+            return Result.error("401", "未登入");
+        }
+
         User user = BeanUtil.copyBean(userDto, User.class);
+       
+        user.setId(loginUser.getId());
 
 //        UpdateWrapper<User> updateWrapper = new UpdateWrapper<User>()
 //                .set(StrUtil.isNotBlank(userDto.getName()), "name", userDto.getName())

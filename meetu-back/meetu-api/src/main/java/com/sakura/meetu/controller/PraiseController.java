@@ -5,6 +5,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.entity.Praise;
 import com.sakura.meetu.entity.User;
@@ -72,12 +73,19 @@ public class PraiseController {
 
     @DeleteMapping
     public Result delete(@RequestBody Praise praise) {
-        praiseService.removeById(praise.getId());
-        // 扣除用户积分
-        Integer userId = praise.getUserId();
-        User user = userService.getById(userId);
-        user.setScore(user.getScore() - 1);
-        userService.updateById(user);
+        String type = praise.getType();
+        Integer fid = praise.getFid();
+        Integer id = SessionUtils.getUser().getId();
+
+        LambdaQueryWrapper<Praise> wrapper = new LambdaQueryWrapper<Praise>()
+                .eq(Praise::getFid, fid)
+                .eq(Praise::getType, type)
+                .eq(Praise::getUserId, id);
+        Praise one = praiseService.getOne(wrapper);
+        if (one == null)
+            return Result.error(Result.CODE_ERROR_404, "不存在该类型的点赞信息");
+
+        praiseService.removeById(one.getId());
 
         return Result.success();
     }

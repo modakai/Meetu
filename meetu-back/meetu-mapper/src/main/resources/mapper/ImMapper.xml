@@ -33,6 +33,7 @@
             <if test="text != ''">
                 and im.text LIKE #{text} '%'
             </if>
+            and im.deleted = 0
         </where>
     </select>
 

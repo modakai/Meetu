@@ -11,7 +11,6 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 
 /**
@@ -41,11 +40,11 @@ public class UserDto implements Serializable {
 
     @ApiModelProperty("邮箱")
     @NotBlank(message = "邮箱不能为空", groups = {EmailLoginGroup.class, SaveGroup.class})
-    @Pattern(
-            regexp = "/^\\w+((.\\w+)|(-\\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/",
-            message = "邮箱格式不正确",
-            groups = {EmailLoginGroup.class, UpdateGroup.class, SaveGroup.class}
-    )
+//    @Pattern(
+//            regexp = "/^\\w+((.\\w+)|(-\\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/",
+//            message = "邮箱格式不正确",
+//            groups = {EmailLoginGroup.class, UpdateGroup.class, SaveGroup.class}
+//    )
     private String email;
 
     @ApiModelProperty("验证码")

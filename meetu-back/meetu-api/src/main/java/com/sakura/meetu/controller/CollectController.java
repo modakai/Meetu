@@ -5,6 +5,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.entity.Collect;
 import com.sakura.meetu.entity.User;
@@ -62,6 +63,22 @@ public class CollectController {
             messagesService.createMessages(user, collect.getDynamicId(), collect.getUserId(), Constant.OPERATION_COLLECT);
         });
 
+        return Result.success();
+    }
+
+    @DeleteMapping("/cancel/{fid}")
+    public Result cancelCollect(@PathVariable Integer fid) {
+        User user = SessionUtils.getUser();
+        Integer uid = user.getId();
+        LambdaQueryWrapper<Collect> wrapper = new LambdaQueryWrapper<Collect>()
+                .eq(Collect::getUserId, uid)
+                .eq(Collect::getDynamicId, fid);
+
+        Collect collect = collectService.getOne(wrapper);
+        if (collect == null)
+            return Result.error(Result.CODE_ERROR_404, "不存在该收藏信息");
+
+        collectService.removeById(collect.getId());
         return Result.success();
     }
 

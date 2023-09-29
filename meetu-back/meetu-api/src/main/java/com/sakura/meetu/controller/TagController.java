@@ -1,6 +1,7 @@
 package com.sakura.meetu.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -38,7 +39,6 @@ public class TagController {
     }
 
     @PostMapping
-    @SaCheckPermission("tag.add")
     public Result save(@RequestBody Tag tag) {
         tagService.save(tag);
         return Result.success();
@@ -66,6 +66,7 @@ public class TagController {
     }
 
     @GetMapping
+    @SaIgnore
     public Result findAll() {
         return Result.success(tagService.list());
     }
