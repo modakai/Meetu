@@ -82,12 +82,13 @@ const handleSelectionChange = (selectionData) => {
 }
 // 批量删除
 const confirmDelBatch = () => {
+  console.log(idArr.value)
   if (!idArr.value || !idArr.value.length) {
     ElMessage.warning("请选择数据")
     return
   }
 
-  delBatch({}).then(res => {
+  delBatch({fileIds: idArr.value}).then(res => {
     if (res.code === '200') {
       ElMessage.success("批量删除成功")
       load()
@@ -119,17 +120,9 @@ const del = (data) => {
 }
 // 下载文件
 const downFile = (row) => {
-  console.log(row.location)
-  downFileBefore(row.location).then(res => {
-    if (res.code === '200') {
-      // 发送下载请求
-      window.open("http://localhost:8848/api/file/download/file?fileName=" + res.data)
-    } else if (res.code === '404') {
-      ElMessage.warning(res.msg)
-    } else {
-      ElMessage.error(res.msg)
-    }
-  })
+  console.log(row.url)
+  window.open(row.url)
+  // window.open("http://localhost:8848/api/file/download/" + row.location)
   // window.open("http://localhost:8848/api/file/download?fileName=" + row.location)
 }
 

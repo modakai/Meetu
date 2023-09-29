@@ -5,6 +5,8 @@ import { ElMessage } from 'element-plus'
 import {loginAdmin} from "@/api/userApi";
 import {useUserStore} from "@/stores/user";
 import router, {setRoutes} from "@/router";
+import { ElLoading } from 'element-plus'
+
 
 const loginData = reactive({
   username: '',
@@ -28,6 +30,7 @@ const login = () => {
   ruleLogin.value.validate(valid => {
     if (valid) {
       loginAdmin(loginData).then(res => {
+        ElLoading.service({fullscreen: true, text: '正在加载'})
         if (res.code === '200') {
           let userInfo = res.data
           ElMessage.success(`欢迎 ${userInfo.username} 登入后台管理系统`)

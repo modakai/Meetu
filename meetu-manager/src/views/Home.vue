@@ -1,6 +1,7 @@
 <script setup>
 import {reactive} from "vue";
 import {noticeAll} from "@/api/noticeApi";
+import { ElLoading } from 'element-plus'
 
 const state = reactive({
   notice: []
@@ -9,6 +10,8 @@ const state = reactive({
 const load = () => {
   noticeAll().then(res => {
     state.notice = res.data
+    let service = ElLoading.service({fullscreen: true, text: '正在加载'});
+    service.close();
   })
 }
 load()
@@ -85,7 +88,7 @@ load()
             <span>公告列表</span>
           </div>
         </template>
-        <div v-if="state.notice">
+        <div v-if="state.notice.length">
           <el-collapse accordion>
           <el-collapse-item v-for="(item,index) in state.notice" :key="item.id" :name="'' + index">
             <template #title>

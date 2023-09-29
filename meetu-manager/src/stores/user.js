@@ -28,7 +28,10 @@ export const useUserStore = defineStore('manager', {
             return this.managerInfo.role || ''
         },
         setUser(data) {
-            this.managerInfo = {...this.managerInfo, data}
+            this.managerInfo.avatar = {...this.managerInfo, data}
+            this.managerInfo.avatar = data.avatar
+            this.managerInfo.name = data.name
+
 
             setRoutes(managerInfo.menus)
         }
