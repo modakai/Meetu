@@ -491,7 +491,6 @@ const handleImportSuccess = (res) => {
           width: 100%;
         }
     }
-
     }
   }
 }

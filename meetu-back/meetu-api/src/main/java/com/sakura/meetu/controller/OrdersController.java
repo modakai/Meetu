@@ -6,6 +6,7 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sakura.meetu.entity.Goods;
 import com.sakura.meetu.entity.Orders;
@@ -13,8 +14,11 @@ import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.IGoodsService;
 import com.sakura.meetu.service.IOrdersService;
 import com.sakura.meetu.service.IUserService;
+import com.sakura.meetu.utils.BeanUtil;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.utils.SessionUtils;
+import com.sakura.meetu.vo.GoodsVo;
+import com.sakura.meetu.vo.OrderDetailVo;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,6 +51,38 @@ public class OrdersController {
         this.ordersService = ordersService;
         this.goodsService = goodsService;
         this.userService = userService;
+    }
+
+
+    @GetMapping("/detail/{id}")
+    public Result findOneOrder(@PathVariable Integer id) {
+        Orders orders = ordersService.getById(id);
+        if (orders == null)
+            return Result.error(Result.CODE_ERROR_404, "没有对应的订单");
+
+        OrderDetailVo orderDetailVo = BeanUtil.copyBean(orders, OrderDetailVo.class);
+
+        Integer goodsId = orders.getGoodsId();
+        Goods goods = goodsService.getById(goodsId);
+        if (goods != null) {
+            GoodsVo goodsVo = BeanUtil.copyBean(goods, GoodsVo.class);
+            orderDetailVo.setGood(goodsVo);
+        }
+        return Result.success(orderDetailVo);
+    }
+
+    @PutMapping("/modify/{id}")
+    public Result modifyOrderStatus(@PathVariable Integer id) {
+        Orders orders = ordersService.getById(id);
+        if (orders == null)
+            return Result.error(Result.CODE_ERROR_404, "不存在对应的订单信息");
+
+        UpdateWrapper<Orders> wrapper = new UpdateWrapper<Orders>()
+                .set("order_status", 2)
+                .eq("id", id);
+        ordersService.update(wrapper);
+
+        return Result.success();
     }
 
     @PostMapping

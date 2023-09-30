@@ -59,6 +59,8 @@ public class UserVo implements Serializable {
 
     private Integer score;
 
+    private String album;
+
     private String Authorization;
 
     private List<PermissionVo> menus;

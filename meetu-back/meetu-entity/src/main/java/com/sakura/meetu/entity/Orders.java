@@ -1,29 +1,26 @@
 package com.sakura.meetu.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import cn.hutool.core.annotation.Alias;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sakura.meetu.config.LDTConfig;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 /**
-* <p>
-* 
-* </p>
-*
-* @author sakura
-* @since 2023-09-14
-*/
+ * <p>
+ *
+ * </p>
+ *
+ * @author sakura
+ * @since 2023-09-14
+ */
 @Getter
 @Setter
 @ApiModel(value = "Orders对象", description = "")
@@ -68,6 +65,10 @@ public class Orders implements Serializable {
     @ApiModelProperty("地址信息")
     @Alias("地址信息")
     private String address;
+
+    @ApiModelProperty("订单状态 1 已兑换； 2已完成")
+    @Alias("订单状态")
+    private Integer orderStatus;
 
     // 软删除
     @ApiModelProperty("软删除")

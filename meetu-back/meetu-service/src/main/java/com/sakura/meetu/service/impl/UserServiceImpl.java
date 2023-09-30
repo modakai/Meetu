@@ -173,7 +173,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         User user = BeanUtil.copyBean(userDto, User.class);
-       
+
         user.setId(loginUser.getId());
 
 //        UpdateWrapper<User> updateWrapper = new UpdateWrapper<User>()
@@ -361,6 +361,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 .age(user.getAge())
                 .gender(user.getGender())
                 .intro(user.getIntro())
+                .album(user.getAlbum())
                 .createTime(user.getCreateTime())
                 .Authorization(token)
                 .menus(menus)

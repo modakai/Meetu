@@ -18,6 +18,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -205,7 +206,7 @@ public class MqMessageServiceImpl implements MqMessageService {
         try {
             emailUtils.sendHtml("『MeetU交友网』邮箱验证提醒", context, email);
             channel.basicAck(deliveryTag, false);
-        } catch (IOException e) {
+        } catch (IOException | MessagingException e) {
             log.error("消息出现异常: {}", e.getMessage());
             try {
                 channel.basicReject(deliveryTag, false);

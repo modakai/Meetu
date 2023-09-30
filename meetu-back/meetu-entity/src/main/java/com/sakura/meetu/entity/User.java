@@ -96,6 +96,10 @@ public class User implements Serializable {
     @Alias("积分")
     private Integer score;
 
+    @Alias("相册")
+    private String album;
+
+
     /**
      * 逻辑删除
      */

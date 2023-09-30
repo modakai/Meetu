@@ -72,6 +72,8 @@ public class UserDto implements Serializable {
 
     private Integer score;
 
+    private String album;
+
     @ApiModelProperty("登入类型")
     @NotBlank(message = "登入端类型不能为空", groups = {LoginGroup.class, EmailLoginGroup.class})
     private String loginType;
