@@ -66,7 +66,10 @@ public class CollectController {
             DynamicServiceImpl dynamicService = SpringUtil.getBean(DynamicServiceImpl.class);
             Dynamic dynamic = dynamicService.getById(collect.getDynamicId());
             String title = dynamic.getName();
-            messagesService.createMessages(user, collect.getDynamicId(), collect.getUserId(), title, Constant.OPERATION_COLLECT);
+            Integer userId = dynamic.getUserId();
+            if (!userId.equals(user.getId())) {
+                messagesService.createMessages(user, collect.getDynamicId(), userId, title, Constant.OPERATION_COLLECT);
+            }
         });
 
         return Result.success();

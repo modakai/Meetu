@@ -64,7 +64,11 @@ public class PraiseController {
             DynamicServiceImpl dynamicService = SpringUtil.getBean(DynamicServiceImpl.class);
             Dynamic dynamic = dynamicService.getById(praise.getFid());
             String title = dynamic.getName();
-            messagesService.createMessages(user, praise.getFid(), praise.getUserId(), title, Constant.OPERATION_PRAISE);
+            Integer userId = dynamic.getUserId();
+            if (!userId.equals(user.getId())) {
+                messagesService.createMessages(user, praise.getFid(), userId, title, Constant.OPERATION_PRAISE);
+            }
+
         });
 
         return Result.success();

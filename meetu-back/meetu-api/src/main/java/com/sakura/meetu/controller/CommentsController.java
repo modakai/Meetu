@@ -5,16 +5,19 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.entity.Comments;
+import com.sakura.meetu.entity.Dynamic;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.ICommentsService;
 import com.sakura.meetu.service.IMessagesService;
 import com.sakura.meetu.service.IUserService;
+import com.sakura.meetu.service.impl.DynamicServiceImpl;
 import com.sakura.meetu.utils.IpUtils;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.utils.SessionUtils;
@@ -70,7 +73,13 @@ public class CommentsController {
         userService.updateById(user);
 
         ThreadUtil.execute(() -> {
-            messagesService.createMessages(user, comments.getDynamicId(), comments.getUserId(), comments.getContent(), Constant.OPERATION_COMMENTS);
+            DynamicServiceImpl dynamicService = SpringUtil.getBean(DynamicServiceImpl.class);
+            Dynamic dynamic = dynamicService.getById(comments.getDynamicId());
+            Integer userId = dynamic.getUserId();
+            if (!userId.equals(user.getId())) {
+
+                messagesService.createMessages(user, comments.getDynamicId(), userId, comments.getContent(), Constant.OPERATION_COMMENTS);
+            }
         });
 
         return Result.success();
