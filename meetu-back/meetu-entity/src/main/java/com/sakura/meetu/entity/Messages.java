@@ -1,25 +1,23 @@
 package com.sakura.meetu.entity;
 
+import cn.hutool.core.annotation.Alias;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.io.Serializable;
-import cn.hutool.core.annotation.Alias;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.sakura.meetu.config.LDTConfig;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 /**
-* <p>
-* 
-* </p>
-*
-* @author sakura
-* @since 2023-09-13
-*/
+ * <p>
+ *
+ * </p>
+ *
+ * @author sakura
+ * @since 2023-09-13
+ */
 @Getter
 @Setter
 @ApiModel(value = "Messages对象", description = "")
@@ -44,6 +42,10 @@ public class Messages implements Serializable {
     @ApiModelProperty("通知人id")
     @Alias("通知人id")
     private Integer userId;
+
+    @ApiModelProperty("动态id")
+    @Alias("动态id")
+    private Integer dynamicId;
 
     // 是否已读
     @ApiModelProperty("是否已读")

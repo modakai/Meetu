@@ -19,8 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class MessagesServiceImpl extends ServiceImpl<MessagesMapper, Messages> implements IMessagesService {
-
-
+    
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
     public void createMessages(User user, Integer dynamicId, Integer dynamicUserId, String operation) {
@@ -38,6 +37,7 @@ public class MessagesServiceImpl extends ServiceImpl<MessagesMapper, Messages> i
         messages.setUserId(dynamicUserId);
         messages.setContent(content);
         messages.setTime(DateUtil.now());
+        messages.setDynamicId(dynamicId);
         save(messages);
     }
 }
