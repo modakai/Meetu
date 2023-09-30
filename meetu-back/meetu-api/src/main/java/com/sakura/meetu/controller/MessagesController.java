@@ -109,7 +109,6 @@ public class MessagesController {
     }
 
     @GetMapping("/page")
-    @SaCheckPermission("messages.list")
     public Result findPage(@RequestParam(defaultValue = "") String name,
                            @RequestParam Integer pageNum,
                            @RequestParam Integer pageSize) {
