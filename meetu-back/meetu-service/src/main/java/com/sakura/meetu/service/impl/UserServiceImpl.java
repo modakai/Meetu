@@ -312,6 +312,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 .age(user.getAge())
                 .gender(user.getGender())
                 .intro(user.getIntro())
+                .album(user.getAlbum())
                 .createTime(user.getCreateTime())
                 .build();
         return Result.success(result);
