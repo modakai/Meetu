@@ -167,7 +167,17 @@ const save = () => {
   })
 }
 
+const valueHtml = ref('')  // 富文本内容
 const editorRef = shallowRef()
+const editorConfig = {
+  placeholder: '请输入内容...',
+  MENU_CONF: {
+    uploadImage: {
+      disabled: true
+    },
+
+  }
+}
 const handleCreated = (editor) => {
   editorRef.value = editor // 记录 editor 实例，重要！
 }
