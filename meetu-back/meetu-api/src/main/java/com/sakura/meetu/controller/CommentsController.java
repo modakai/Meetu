@@ -77,8 +77,8 @@ public class CommentsController {
             Dynamic dynamic = dynamicService.getById(comments.getDynamicId());
             Integer userId = dynamic.getUserId();
             if (!userId.equals(user.getId())) {
-
-                messagesService.createMessages(user, comments.getDynamicId(), userId, comments.getContent(), Constant.OPERATION_COMMENTS);
+                String builder = dynamic.getName() + "," + comments.getContent();
+                messagesService.createMessages(user, comments.getDynamicId(), userId, builder, Constant.OPERATION_COMMENTS);
             }
         });
 

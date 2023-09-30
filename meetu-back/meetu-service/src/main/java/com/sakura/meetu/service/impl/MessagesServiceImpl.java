@@ -31,7 +31,10 @@ public class MessagesServiceImpl extends ServiceImpl<MessagesMapper, Messages> i
                 content = user.getName() + operation + "了您的动态<strong>+" + content + "</strong>";
                 break;
             case Constant.OPERATION_COMMENTS:
-                content = user.getName() + operation + "了您的动态<strong>+" + content + "</strong> <br/>回复的内容：<span>" + content + "</span>";
+                String[] split = content.split(",");
+                String title = split[0];
+                String commentsContent = split[1];
+                content = user.getName() + operation + "了您的动态<strong>" + title + "</strong> <br/>回复的内容：<span>" + commentsContent + "</span>";
                 break;
         }
 
