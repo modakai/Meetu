@@ -14,5 +14,5 @@ import com.sakura.meetu.entity.User;
  */
 public interface IMessagesService extends IService<Messages> {
 
-    void createMessages(User user, Integer dynamicId, Integer dynamicUserId, String operation);
+    void createMessages(User user, Integer dynamicId, Integer dynamicUserId, String content, String operation);
 }

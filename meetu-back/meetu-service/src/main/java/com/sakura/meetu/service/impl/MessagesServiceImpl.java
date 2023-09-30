@@ -2,6 +2,7 @@ package com.sakura.meetu.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sakura.meetu.constants.Constant;
 import com.sakura.meetu.entity.Messages;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.mapper.MessagesMapper;
@@ -19,20 +20,22 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class MessagesServiceImpl extends ServiceImpl<MessagesMapper, Messages> implements IMessagesService {
-    
+
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public void createMessages(User user, Integer dynamicId, Integer dynamicUserId, String operation) {
+    public void createMessages(User user, Integer dynamicId, Integer dynamicUserId, String content, String operation) {
         // TODO (sakura, 2023/9/13, 21:10, 记得跟前端要访问地址)
-        String content = user.getName() +
-                operation +
-                "了您的动态" +
-                "&npsb;" +
-                "<a target='_blank' href='前端动态的地址" +
-                "?id=" +
-                dynamicId +
-                "' >" +
-                "立即查看》》》" + "</a>";
+
+        switch (operation) {
+            case Constant.OPERATION_COLLECT:
+            case Constant.OPERATION_PRAISE:
+                content = user.getName() + operation + "了您的动态<strong>+" + content + "</strong>";
+                break;
+            case Constant.OPERATION_COMMENTS:
+                content = user.getName() + operation + "了您的动态<strong>+" + content + "</strong> <br/>回复的内容：<span>" + content + "</span>";
+                break;
+        }
+
         Messages messages = new Messages();
         messages.setUserId(dynamicUserId);
         messages.setContent(content);

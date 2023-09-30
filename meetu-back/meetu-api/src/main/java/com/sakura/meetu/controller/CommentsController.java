@@ -70,7 +70,7 @@ public class CommentsController {
         userService.updateById(user);
 
         ThreadUtil.execute(() -> {
-            messagesService.createMessages(user, comments.getDynamicId(), comments.getUserId(), Constant.OPERATION_COMMENTS);
+            messagesService.createMessages(user, comments.getDynamicId(), comments.getUserId(), comments.getContent(), Constant.OPERATION_COMMENTS);
         });
 
         return Result.success();

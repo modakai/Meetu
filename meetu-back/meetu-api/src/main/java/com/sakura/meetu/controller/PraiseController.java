@@ -2,16 +2,19 @@ package com.sakura.meetu.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sakura.meetu.constants.Constant;
+import com.sakura.meetu.entity.Dynamic;
 import com.sakura.meetu.entity.Praise;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.IMessagesService;
 import com.sakura.meetu.service.IPraiseService;
 import com.sakura.meetu.service.IUserService;
+import com.sakura.meetu.service.impl.DynamicServiceImpl;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.utils.SessionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +61,10 @@ public class PraiseController {
         userService.updateById(user);
 
         ThreadUtil.execute(() -> {
-            messagesService.createMessages(user, praise.getFid(), praise.getUserId(), Constant.OPERATION_PRAISE);
+            DynamicServiceImpl dynamicService = SpringUtil.getBean(DynamicServiceImpl.class);
+            Dynamic dynamic = dynamicService.getById(praise.getFid());
+            String title = dynamic.getName();
+            messagesService.createMessages(user, praise.getFid(), praise.getUserId(), title, Constant.OPERATION_PRAISE);
         });
 
         return Result.success();
