@@ -204,7 +204,9 @@ public class MqMessageServiceImpl implements MqMessageService {
                 + "<span style='font-size: 18px; float:right; margin-right: 60px;'>" + sdf.format(new Date()) + "</span></body></html>";
 
         try {
-            emailUtils.sendHtml("『MeetU交友网』邮箱验证提醒", context, email);
+            ThreadUtil.execute(() -> {
+                emailUtils.sendHtml("『MeetU交友网』邮箱验证提醒", context, email);
+            });
             channel.basicAck(deliveryTag, false);
         } catch (IOException | MessagingException e) {
             log.error("消息出现异常: {}", e.getMessage());
