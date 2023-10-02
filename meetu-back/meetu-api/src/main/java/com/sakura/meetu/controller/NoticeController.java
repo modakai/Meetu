@@ -1,11 +1,14 @@
 package com.sakura.meetu.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sakura.meetu.config.annotation.AutoLog;
 import com.sakura.meetu.entity.Notice;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.service.INoticeService;
@@ -37,6 +40,16 @@ public class NoticeController {
 
     public NoticeController(INoticeService noticeService) {
         this.noticeService = noticeService;
+    }
+
+
+    @AutoLog("获取已发布的系统公告")
+    @GetMapping("/release/list")
+    @SaIgnore
+    public Result getReleaseNoticeList() {
+        LambdaQueryWrapper<Notice> queryWrapper = new LambdaQueryWrapper<Notice>()
+                .eq(Notice::getStatus, 1);
+        return Result.success(noticeService.list(queryWrapper));
     }
 
     @PostMapping

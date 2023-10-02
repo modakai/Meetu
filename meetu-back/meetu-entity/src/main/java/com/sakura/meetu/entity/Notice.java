@@ -61,4 +61,7 @@ public class Notice implements Serializable {
     @ApiModelProperty("创建人id")
     @Alias("创建人id")
     private Integer userid;
+
+    @Alias("是否发布")
+    private Integer status;
 }

@@ -24,11 +24,10 @@ public class MessagesServiceImpl extends ServiceImpl<MessagesMapper, Messages> i
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
     public void createMessages(User user, Integer dynamicId, Integer dynamicUserId, String content, String operation) {
-        // TODO (sakura, 2023/9/13, 21:10, 记得跟前端要访问地址)
         switch (operation) {
             case Constant.OPERATION_COLLECT:
             case Constant.OPERATION_PRAISE:
-                content = user.getName() + operation + "了您的动态<strong>+" + content + "</strong>";
+                content = user.getName() + operation + "了您的动态<strong>" + content + "</strong>";
                 break;
             case Constant.OPERATION_COMMENTS:
                 String[] split = content.split(",");
