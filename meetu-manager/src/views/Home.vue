@@ -1,6 +1,6 @@
 <script setup>
 import {reactive} from "vue";
-import {noticeAll} from "@/api/noticeApi";
+import { noticeReleaseList} from "@/api/noticeApi";
 import { ElLoading } from 'element-plus'
 
 const state = reactive({
@@ -8,7 +8,7 @@ const state = reactive({
 })
 
 const load = () => {
-  noticeAll().then(res => {
+  noticeReleaseList().then(res => {
     state.notice = res.data
     let service = ElLoading.service({fullscreen: true, text: '正在加载'});
     service.close();

@@ -73,6 +73,9 @@ const resetDialog = (data) => {
   dialogData.dialogFormVisible = true
   nextTick(() => {
     dialogData.formData = JSON.parse(JSON.stringify(data))
+    if (!dialogData.formData.status) {
+      dialogData.formData.status = 0
+    }
     dialogFormRef.value.resetFields()
   })
 }
@@ -275,11 +278,18 @@ const save = () => {
       >
        <el-table-column type="selection" width="55"/>
 
-        <el-table-column prop="content" label="内容"></el-table-column>
         <el-table-column prop="id" label="编号"></el-table-column>
+        <el-table-column prop="content" label="内容"></el-table-column>
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="user" label="创建人"></el-table-column>
-        <el-table-column prop="userid" label="创建人id"></el-table-column>
+        <el-table-column  label="是否发布">
+          <template #default="scope">
+            <el-tag v-if="scope.row.status === 0">未发布</el-tag>
+            <el-tag v-else type="success" >已发布</el-tag>
+
+          </template>
+        </el-table-column>
+<!--        <el-table-column prop="userid" label="创建人id"></el-table-column>-->
 
 
        <el-table-column label="操作" width="180">
@@ -350,6 +360,16 @@ const save = () => {
               placeholder="想要发点什么？"
               autocomplete="off"
           ></el-input>
+        </el-form-item>
+        <el-form-item prop="status" label="是否发布">
+          <el-select v-model="dialogData.formData.status"  placeholder="请选择是否发布" size="large" style="width: 100%;">
+            <el-option
+                v-for="item in [{value: 0, label: '未发布'}, {value: 1, label: '已发布'}]"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            />
+          </el-select>
         </el-form-item>
 
       </el-form>

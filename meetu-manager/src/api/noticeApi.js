@@ -15,6 +15,10 @@ export const noticeAll = () => requests({
     url: '/notice',
     method: 'GET'
 })
+export const noticeReleaseList = () => requests({
+    url: '/notice/release/list',
+    method: 'GET'
+})
 
 // 批量删除用户
 export const delBatch = (data) => requests({
