@@ -76,10 +76,22 @@ public class CommentsController {
             DynamicServiceImpl dynamicService = SpringUtil.getBean(DynamicServiceImpl.class);
             Dynamic dynamic = dynamicService.getById(comments.getDynamicId());
             Integer userId = dynamic.getUserId();
-            if (!userId.equals(user.getId())) {
-                String builder = dynamic.getName() + "," + comments.getContent();
-                messagesService.createMessages(user, comments.getDynamicId(), userId, builder, Constant.OPERATION_COMMENTS);
+            Integer puserId = comments.getPuserId();
+            Integer toUserId = null;
+            // 说明是一级评论
+            if (puserId == null) {
+                // 一级评论要将构建的消息发给动态 所属用户的账号
+                toUserId = userId;
+            } else {
+                toUserId = puserId;
             }
+
+            // 不发给用户自己本身
+            if (!toUserId.equals(user.getId())) {
+                String builder = dynamic.getName() + "," + comments.getContent();
+                messagesService.createMessages(user, comments.getDynamicId(), toUserId, builder, Constant.OPERATION_COMMENTS);
+            }
+
         });
 
         return Result.success();
