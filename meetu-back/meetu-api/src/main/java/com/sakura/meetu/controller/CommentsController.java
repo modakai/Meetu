@@ -3,7 +3,6 @@ package com.sakura.meetu.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Dict;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.poi.excel.ExcelReader;
@@ -18,7 +17,6 @@ import com.sakura.meetu.service.ICommentsService;
 import com.sakura.meetu.service.IMessagesService;
 import com.sakura.meetu.service.IUserService;
 import com.sakura.meetu.service.impl.DynamicServiceImpl;
-import com.sakura.meetu.utils.IpUtils;
 import com.sakura.meetu.utils.Result;
 import com.sakura.meetu.utils.SessionUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,8 +61,8 @@ public class CommentsController {
         comments.setUserId(user.getId());
         comments.setTime(DateUtil.now());
         // 读取IP
-        Dict ipAndCity = IpUtils.getIPAndCity();
-        comments.setLocation(ipAndCity.get("city").toString());
+//        Dict ipAndCity = IpUtils.getIPAndCity();
+//        comments.setLocation(ipAndCity.get("city").toString());
         // 添加评论
         commentsService.save(comments);
 
