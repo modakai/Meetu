@@ -123,7 +123,6 @@ public class CollectController {
     }
 
     @GetMapping("/page")
-    @SaCheckPermission("collect.list")
     public Result findPage(@RequestParam(defaultValue = "") String name,
                            @RequestParam Integer pageNum,
                            @RequestParam Integer pageSize) {
