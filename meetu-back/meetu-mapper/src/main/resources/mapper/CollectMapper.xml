@@ -22,6 +22,7 @@
                 AND sys_user.name LIKE #{username} '%'
             </if>
             AND collect.deleted = 0
+            AND dynamic.name != ''
         </where>
 
     </select>

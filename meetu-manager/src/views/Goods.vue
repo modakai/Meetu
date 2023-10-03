@@ -310,8 +310,8 @@ const save = () => {
         <el-table-column prop="score" label="所需积分"></el-table-column>
         <el-table-column label="图片">
           <template #default="scope">
-            <el-image preview-teleported style="width: 80px; height: 80px" :src="scope.row.img"
-                      :preview-src-list="[scope.row.img]"></el-image>
+            <el-image preview-teleported style="width: 80px; height: 80px" :src="'http://localhost:8848' + scope.row.img"
+                      :preview-src-list="['http://localhost:8848' + scope.row.img]"></el-image>
           </template>
         </el-table-column>
         <el-table-column prop="statusRadio" label="是否上架"></el-table-column>
@@ -403,7 +403,7 @@ const save = () => {
               :on-success="handleImportSuccess"
               :headers="{ Authorization: useUserStore().getAuthorization}"
           >
-            <img v-if="dialogData.formData.img" :src="dialogData.formData.img" class="avatar" />
+            <img v-if="dialogData.formData.img" :src="'http://localhost:8848' + dialogData.formData.img" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </el-form-item>

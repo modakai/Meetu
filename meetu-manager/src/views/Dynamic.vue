@@ -328,8 +328,8 @@ const handleImportSuccess = (res) => {
         </el-table-column>
         <el-table-column label="图片">
           <template #default="scope">
-            <el-image preview-teleported style="width: 80px; height: 80px" :src="scope.row.img"
-                      :preview-src-list="[scope.row.img]"></el-image>
+            <el-image preview-teleported style="width: 80px; height: 80px" :src="'http://localhost:8848' + scope.row.img"
+                      :preview-src-list="['http://localhost:8848' + scope.row.img]"></el-image>
           </template>
         </el-table-column>
         <el-table-column label="用户">
@@ -420,7 +420,7 @@ const handleImportSuccess = (res) => {
               :on-success="handleImportSuccess"
               :headers="{ Authorization: useUserStore().getAuthorization}"
           >
-            <el-image v-if="dialogData.formData.img" preview-teleported :src="dialogData.formData.img" class="avatar" />
+            <el-image v-if="dialogData.formData.img" preview-teleported :src="'http://localhost:8848' + dialogData.formData.img" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </el-form-item>

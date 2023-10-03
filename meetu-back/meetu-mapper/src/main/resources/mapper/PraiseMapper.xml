@@ -36,6 +36,7 @@
                 AND sys_user.name LIKE #{username} '%'
             </if>
             AND praise.deleted = 0
+            AND dynamic.name != ''
         </where>
 
 

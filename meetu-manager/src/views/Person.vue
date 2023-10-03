@@ -45,7 +45,7 @@ const save = () => {
               :on-success="handleImportSuccess"
               :headers="{ Authorization: token}"
           >
-            <img v-if="state.form.avatar" :src="state.form.avatar" class="avatar" />
+            <img v-if="state.form.avatar" :src="'http://localhost:8848'+ state.form.avatar" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </div>

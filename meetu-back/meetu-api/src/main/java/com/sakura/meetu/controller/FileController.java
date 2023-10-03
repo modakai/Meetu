@@ -96,7 +96,7 @@ public class FileController {
             return Result.error("文件上传失败");
         }
 
-        String url = "http://" + downloadIp + ":" + port + "/api/file/download/" + fileFullName;
+        String url = "/api/file/download/" + fileFullName;
         saveFile(originalFilename, size, md5, extName, fileUploadPath, url);
         // 看看数据库是否存在错误的文件路径，修复下
         if (existFiles.size() > 0) {

@@ -360,20 +360,22 @@ onBeforeUnmount(() => {
         <el-form-item prop="type" label="类型">
           <el-input v-model="dialogData.formData.type" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item prop="user.name" label="点赞人">
+        <el-form-item label="点赞人">
           <el-input v-model="dialogData.formData.user.name" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item prop="dynamic.name" label="动态标题">
+        <el-form-item  label="动态标题">
           <el-input v-model="dialogData.formData.dynamic.name" autocomplete="off"></el-input>
         </el-form-item>
 
-        <Editor
-            style="height: 300px; overflow-y: hidden;"
-            v-model="valueHtml"
-            :defaultConfig="editorConfig"
-            :mode="'simple'"
-            @onCreated="handleCreated"
-        />
+        <el-form-item label="内容">
+          <Editor
+              style="height: 300px; overflow-y: hidden;"
+              v-model="valueHtml"
+              :defaultConfig="editorConfig"
+              :mode="'simple'"
+              @onCreated="handleCreated"
+          />
+        </el-form-item>
 
       </el-form>
 

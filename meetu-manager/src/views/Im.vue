@@ -223,8 +223,8 @@ const save = () => {
                 v-show="scope.row.img"
                 preview-teleported
                 style="width: 100px; height: 100px"
-                :src="scope.row.img"
-                :preview-src-list="[scope.row.img]"
+                :src="'http:localhost:8848'+ scope.row.img"
+                :preview-src-list="['http:localhost:8848'+ scope.row.img]"
             >
             </el-image>
           </template>

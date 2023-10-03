@@ -4,6 +4,7 @@ import { useUserStore } from "@/stores/user";
 import {ref} from "vue";
 import {logoutAdmin} from "@/api/userApi";
 import {ElMessage} from "element-plus";
+import { ElLoading } from 'element-plus'
 
 import router from "@/router";
 
@@ -11,7 +12,7 @@ import router from "@/router";
 const admin = ref(useUserStore().getManagerInfo)
 
 const logout = () => {
-
+  const logoutLoging = ElLoading.service({fullscreen: true, text: '正在退出'})
   // 发送请求
   logoutAdmin({
     uid: admin.value.uid,
@@ -20,8 +21,8 @@ const logout = () => {
     if (res.code === '200') {
       // 重载 manager中的数据
       useUserStore().reset()
-
       ElMessage.success('退出成功')
+      logoutLoging.close();
     } else {
       ElMessage.error(res.msg)
     }
@@ -51,7 +52,7 @@ const toPersion = () => {
             <el-dropdown>
               <el-avatar
                   :size="40"
-                  :src="admin.avatar"
+                  :src="'http://localhost:8848' + admin.avatar"
               />
               <template #dropdown>
                 <el-dropdown-menu>
