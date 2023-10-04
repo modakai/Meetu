@@ -14,6 +14,7 @@
                 LEFT JOIN sys_user psu ON comments.puser_id = psu.id
         WHERE
             comments.dynamic_id = #{dynamicId}
+            AND comments.deleted = 0
     </select>
 
     <select id="selectAllByDynamicName" resultType="com.sakura.meetu.entity.Comments">
