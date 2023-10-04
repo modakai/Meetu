@@ -8,7 +8,8 @@
             collect.dynamic_id, collect.user_id,
             sys_user.`name` AS `username`,
             dynamic.`name`  AS `dynamic_name`,
-            dynamic.content AS `content`
+            dynamic.content AS `content`,
+            dynamic.img
         FROM
             collect
                 LEFT JOIN sys_user ON collect.user_id = sys_user.id AND sys_user.deleted = 0

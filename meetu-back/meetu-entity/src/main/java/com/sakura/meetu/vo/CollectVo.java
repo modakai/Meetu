@@ -20,4 +20,5 @@ public class CollectVo extends Collect implements Serializable {
     private String username;
     private String dynamicName;
     private String content;
+    private String img;
 }
