@@ -36,7 +36,7 @@ public class ImServiceImpl extends ServiceImpl<ImMapper, Im> implements IImServi
         }
 
         // 要封装数据 但是级联查询好像用不了
-        List<ImVo> result = imMapper.selectImMessageLimit(limit);
+        List<ImVo> result = imMapper.selectImMessageLimit(1000);
         // 排序
         result.sort(Comparator.comparing(ImVo::getId));
 

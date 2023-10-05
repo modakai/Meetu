@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sakura.meetu.mapper.ImMapper">
-    <cache />
     <resultMap id="imVo" type="com.sakura.meetu.entity.ImVo">
         <id property="id" column="id"></id>
         <result property="uid" column="uid"></result>
