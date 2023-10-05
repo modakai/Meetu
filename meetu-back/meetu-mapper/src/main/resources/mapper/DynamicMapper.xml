@@ -20,47 +20,44 @@
     <!-- TODO (sakura, 2023/9/9, 15:06, 差 评论数量) -->
     <select id="selectALLBYUserIdOrDynamicId" resultMap="all">
         SELECT
-            d.id, d.user_id, d.name,
-            d.content, d.time, d.view,
-            d.descr, d.img, d.tags,
-            COUNT(p.fid) AS praise_count,
-            COUNT(c.dynamic_id) AS collect_count,
-            COUNT(cm.dynamic_id) AS comment_count
+        d.id, d.user_id, d.name,
+        d.content, d.time, d.view,
+        d.descr, d.img, d.tags,
+        p.praise_count,
+        c.collect_count,
+        cm.comment_count
         FROM
-            dynamic d
-        LEFT JOIN
-            (
-            SELECT
-                fid, COUNT(fid) AS praise_count
-            FROM
-                praise
-            WHERE
-                deleted = 0
-            GROUP BY
-                fid
-            ) p ON d.id = p.fid
-        LEFT JOIN
-            (
-            SELECT
-                dynamic_id, COUNT(dynamic_id) AS collect_count
-            FROM
-             collect
-            WHERE
-                deleted = 0
-            GROUP BY
-                dynamic_id
-            ) c ON d.id = c.dynamic_id
-        LEFT JOIN
-            (
-            SELECT
-                dynamic_id, COUNT(dynamic_id) AS comment_count
-            FROM
-                comments
-            WHERE
-                deleted = 0
-            GROUP BY
-                dynamic_id
-            ) cm ON d.id = cm.dynamic_id
+        dynamic d
+        LEFT JOIN (
+        SELECT
+        fid, COUNT(fid) AS praise_count
+        FROM
+        praise
+        WHERE
+        deleted = 0
+        GROUP BY
+        fid
+        ) p ON d.id = p.fid
+        LEFT JOIN (
+        SELECT
+        dynamic_id, COUNT(dynamic_id) AS collect_count
+        FROM
+        collect
+        WHERE
+        deleted = 0
+        GROUP BY
+        dynamic_id
+        ) c ON d.id = c.dynamic_id
+        LEFT JOIN (
+        SELECT
+        dynamic_id, COUNT(dynamic_id) AS comment_count
+        FROM
+        comments
+        WHERE
+        deleted = 0
+        GROUP BY
+        dynamic_id
+        ) cm ON d.id = cm.dynamic_id
         <where>
             <if test="dynamicId != null">
                 AND d.id = #{dynamicId}
@@ -73,20 +70,17 @@
             </if>
             AND d.deleted = 0
         </where>
-        GROUP BY
-            d.id
         UNION
         SELECT
-            d.id, d.user_id, d.name,
-            d.content, d.time, d.view,
-            d.descr, d.img,  d.tags,
-            COUNT(p.fid) AS praise_count,
-            COUNT(c.dynamic_id) AS collect_count,
-            COUNT(cm.dynamic_id) AS comment_count
+        d.id, d.user_id, d.name,
+        d.content, d.time, d.view,
+        d.descr, d.img, d.tags,
+        p.praise_count,
+        c.collect_count,
+        cm.comment_count
         FROM
-            dynamic d
-        LEFT JOIN
-        (
+        dynamic d
+        LEFT JOIN (
         SELECT
         fid, COUNT(fid) AS praise_count
         FROM
@@ -96,8 +90,7 @@
         GROUP BY
         fid
         ) p ON d.id = p.fid
-        LEFT JOIN
-        (
+        LEFT JOIN (
         SELECT
         dynamic_id, COUNT(dynamic_id) AS collect_count
         FROM
@@ -107,8 +100,7 @@
         GROUP BY
         dynamic_id
         ) c ON d.id = c.dynamic_id
-        LEFT JOIN
-        (
+        LEFT JOIN (
         SELECT
         dynamic_id, COUNT(dynamic_id) AS comment_count
         FROM
@@ -130,20 +122,17 @@
             </if>
             AND d.deleted = 0
         </where>
-        GROUP BY
-        d.id
         UNION
         SELECT
-            d.id, d.user_id, d.name,
-            d.content, d.time, d.view,
-            d.descr, d.img,  d.tags,
-            COUNT(p.fid) AS praise_count,
-            COUNT(c.dynamic_id) AS collect_count,
-            COUNT(cm.dynamic_id) AS comment_count
+        d.id, d.user_id, d.name,
+        d.content, d.time, d.view,
+        d.descr, d.img, d.tags,
+        p.praise_count,
+        c.collect_count,
+        cm.comment_count
         FROM
-            dynamic d
-        LEFT JOIN
-        (
+        dynamic d
+        LEFT JOIN (
         SELECT
         fid, COUNT(fid) AS praise_count
         FROM
@@ -153,8 +142,7 @@
         GROUP BY
         fid
         ) p ON d.id = p.fid
-        LEFT JOIN
-        (
+        LEFT JOIN (
         SELECT
         dynamic_id, COUNT(dynamic_id) AS collect_count
         FROM
@@ -164,8 +152,7 @@
         GROUP BY
         dynamic_id
         ) c ON d.id = c.dynamic_id
-        LEFT JOIN
-        (
+        LEFT JOIN (
         SELECT
         dynamic_id, COUNT(dynamic_id) AS comment_count
         FROM
@@ -187,8 +174,6 @@
             </if>
             AND d.deleted = 0
         </where>
-        GROUP BY
-            d.id
     </select>
     <select id="selectHotAll" resultType="com.sakura.meetu.entity.Dynamic">
         SELECT d.id,
