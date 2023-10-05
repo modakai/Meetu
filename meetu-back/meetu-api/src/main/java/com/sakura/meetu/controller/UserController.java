@@ -2,17 +2,22 @@ package com.sakura.meetu.controller;
 
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sakura.meetu.config.annotation.AutoLog;
+import com.sakura.meetu.dto.PasswordDto;
 import com.sakura.meetu.dto.UserDto;
 import com.sakura.meetu.entity.User;
 import com.sakura.meetu.exception.ServiceException;
 import com.sakura.meetu.service.IUserService;
+import com.sakura.meetu.utils.PasswordEncoderUtil;
 import com.sakura.meetu.utils.Result;
+import com.sakura.meetu.utils.SessionUtils;
 import com.sakura.meetu.validation.UserInfoUpdateGroup;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -55,6 +60,33 @@ public class UserController {
     public Result modifyUser(@RequestBody @Validated(UserInfoUpdateGroup.class) UserDto userDto) {
         // 修改用户的个人信息 头像 name age gender intro
         return userService.modifyUser(userDto);
+    }
+
+    @PutMapping("/password")
+    public Result changePassword(@RequestBody PasswordDto passwordDto) {
+        if (StrUtil.isBlank(passwordDto.getNewPassword()) || StrUtil.isBlank(passwordDto.getOldPassword()))
+            return Result.error(Result.CODE_ERROR_401, "用户未登入");
+
+        User loginUser = SessionUtils.getUser();
+        User user = userService.getById(loginUser.getId());
+        if (user != null) {
+            // 匹配密码
+            String password = user.getPassword();
+            String oldPassword = passwordDto.getOldPassword();
+            boolean matches = PasswordEncoderUtil.matches(oldPassword, password);
+            if (!matches) {
+                return Result.error(Result.CODE_ERROR_400, "旧密码错误");
+            }
+
+            // 修改密码
+            UpdateWrapper<User> wrapper = new UpdateWrapper<User>()
+                    .set("password", PasswordEncoderUtil.encodePassword(passwordDto.getNewPassword()))
+                    .eq("id", user.getId());
+            userService.update(wrapper);
+            return Result.success();
+        } else {
+            return Result.error(Result.CODE_ERROR_401, "用户未登入");
+        }
     }
 
     @PutMapping
