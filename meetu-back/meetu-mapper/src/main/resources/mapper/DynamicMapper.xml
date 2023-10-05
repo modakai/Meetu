@@ -29,11 +29,38 @@
         FROM
             dynamic d
         LEFT JOIN
-            praise p ON d.id = p.fid AND p.deleted = 0
+            (
+            SELECT
+                fid, COUNT(fid) AS praise_count
+            FROM
+                praise
+            WHERE
+                deleted = 0
+            GROUP BY
+                fid
+            ) p ON d.id = p.fid
         LEFT JOIN
-            collect c ON d.id = c.dynamic_id AND c.deleted = 0
+            (
+            SELECT
+                dynamic_id, COUNT(dynamic_id) AS collect_count
+            FROM
+             collect
+            WHERE
+                deleted = 0
+            GROUP BY
+                dynamic_id
+            ) c ON d.id = c.dynamic_id
         LEFT JOIN
-            comments cm ON d.id = cm.dynamic_id AND cm.deleted = 0
+            (
+            SELECT
+                dynamic_id, COUNT(dynamic_id) AS comment_count
+            FROM
+                comments
+            WHERE
+                deleted = 0
+            GROUP BY
+                dynamic_id
+            ) cm ON d.id = cm.dynamic_id
         <where>
             <if test="dynamicId != null">
                 AND d.id = #{dynamicId}
@@ -59,11 +86,38 @@
         FROM
             dynamic d
         LEFT JOIN
-            praise p ON d.id = p.fid AND p.deleted = 0
+        (
+        SELECT
+        fid, COUNT(fid) AS praise_count
+        FROM
+        praise
+        WHERE
+        deleted = 0
+        GROUP BY
+        fid
+        ) p ON d.id = p.fid
         LEFT JOIN
-            collect c ON d.id = c.dynamic_id AND c.deleted = 0
+        (
+        SELECT
+        dynamic_id, COUNT(dynamic_id) AS collect_count
+        FROM
+        collect
+        WHERE
+        deleted = 0
+        GROUP BY
+        dynamic_id
+        ) c ON d.id = c.dynamic_id
         LEFT JOIN
-            comments cm ON d.id = cm.dynamic_id AND cm.deleted = 0
+        (
+        SELECT
+        dynamic_id, COUNT(dynamic_id) AS comment_count
+        FROM
+        comments
+        WHERE
+        deleted = 0
+        GROUP BY
+        dynamic_id
+        ) cm ON d.id = cm.dynamic_id
         <where>
             <if test="dynamicId != null">
                 AND d.id = #{dynamicId}
@@ -89,11 +143,38 @@
         FROM
             dynamic d
         LEFT JOIN
-            praise p ON d.id = p.fid AND p.deleted = 0
+        (
+        SELECT
+        fid, COUNT(fid) AS praise_count
+        FROM
+        praise
+        WHERE
+        deleted = 0
+        GROUP BY
+        fid
+        ) p ON d.id = p.fid
         LEFT JOIN
-            collect c ON d.id = c.dynamic_id AND c.deleted = 0
+        (
+        SELECT
+        dynamic_id, COUNT(dynamic_id) AS collect_count
+        FROM
+        collect
+        WHERE
+        deleted = 0
+        GROUP BY
+        dynamic_id
+        ) c ON d.id = c.dynamic_id
         LEFT JOIN
-            comments cm ON d.id = cm.dynamic_id AND cm.deleted = 0
+        (
+        SELECT
+        dynamic_id, COUNT(dynamic_id) AS comment_count
+        FROM
+        comments
+        WHERE
+        deleted = 0
+        GROUP BY
+        dynamic_id
+        ) cm ON d.id = cm.dynamic_id
         <where>
             <if test="dynamicId != null">
                 AND d.id = #{dynamicId}
@@ -104,8 +185,8 @@
             <if test="dynamicName != null">
                 AND d.tags LIKE #{dynamicName} '%'
             </if>
+            AND d.deleted = 0
         </where>
-        AND d.deleted = 0
         GROUP BY
             d.id
     </select>
