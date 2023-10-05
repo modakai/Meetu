@@ -100,6 +100,7 @@ public class WebSocketServer {
         ImVo imMessage = new ImVo();
         imMessage.setId(im.getId());
         imMessage.setUid(uid);
+        imMessage.setText(message);
         imMessage.setAvatar(user.getAvatar());
         imMessage.setUsername(user.getUsername());
         imMessage.setIntro(user.getIntro());
